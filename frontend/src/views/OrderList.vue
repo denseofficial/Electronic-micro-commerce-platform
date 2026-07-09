@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getOrders, cancelOrder } from '../api/orders'
+import { getOrders, cancelOrder, shipOrder, confirmReceive } from '../api/orders'
 import { formatPrice, formatDate, getOrderStatusText } from '../utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
@@ -53,6 +53,28 @@ async function handleCancel(order) {
 function goPay(order) {
   router.push({ name: 'OrderConfirm', params: { id: order.id } })
 }
+
+async function handleShip(order) {
+  try {
+    await shipOrder(order.id)
+    order.status = 'shipped'
+    order.shipTime = new Date().toISOString()
+    ElMessage.success('已发货')
+  } catch (e) {
+    ElMessage.error('发货失败：' + (e.response?.data?.message || e.message || '未知错误'))
+  }
+}
+
+async function handleReceive(order) {
+  try {
+    await confirmReceive(order.id)
+    order.status = 'completed'
+    order.receiveTime = new Date().toISOString()
+    ElMessage.success('已确认收货')
+  } catch (e) {
+    ElMessage.error('操作失败：' + (e.response?.data?.message || e.message || '未知错误'))
+  }
+}
 </script>
 
 <template>
@@ -102,6 +124,8 @@ function goPay(order) {
           <div class="order-actions">
             <button v-if="order.status === 'pending'" class="btn btn--pay" @click="goPay(order)">去付款</button>
             <button v-if="order.status === 'pending'" class="btn btn--cancel" @click="handleCancel(order)">取消</button>
+            <button v-if="order.status === 'paid'" class="btn btn--ship" @click="handleShip(order)">发货（演示）</button>
+            <button v-if="order.status === 'shipped'" class="btn btn--receive" @click="handleReceive(order)">确认收货</button>
             <button class="btn btn--detail" @click="goDetail(order.id)">查看详情</button>
           </div>
         </div>

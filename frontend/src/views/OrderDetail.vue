@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getOrderDetail, cancelOrder } from '../api/orders'
+import { getOrderDetail, cancelOrder, shipOrder, confirmReceive } from '../api/orders'
 import { formatPrice, formatDate, getOrderStatusText } from '../utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
@@ -30,6 +30,26 @@ async function handleCancel() {
     }
   }
 }
+
+async function handleShip() {
+  try {
+    const res = await shipOrder(order.value.id)
+    order.value = res.data
+    ElMessage.success('已发货')
+  } catch (e) {
+    ElMessage.error('发货失败：' + (e.response?.data?.message || e.message || '未知错误'))
+  }
+}
+
+async function handleReceive() {
+  try {
+    const res = await confirmReceive(order.value.id)
+    order.value = res.data
+    ElMessage.success('已确认收货')
+  } catch (e) {
+    ElMessage.error('操作失败：' + (e.response?.data?.message || e.message || '未知错误'))
+  }
+}
 </script>
 
 <template>
@@ -41,6 +61,8 @@ async function handleCancel() {
     <div class="status-bar" :class="order.status">
       <span class="status-text">{{ getOrderStatusText(order.status) }}</span>
       <button v-if="order.status === 'pending'" class="cancel-btn" @click="handleCancel">取消订单</button>
+      <button v-if="order.status === 'paid'" class="ship-btn" @click="handleShip">发货（演示）</button>
+      <button v-if="order.status === 'shipped'" class="receive-btn" @click="handleReceive">确认收货</button>
     </div>
 
     <!-- 收货信息 -->
@@ -99,6 +121,8 @@ async function handleCancel() {
 .status-bar.completed .status-text { color: #2ed573; }
 .status-bar.cancelled .status-text { color: var(--text-muted); }
 .cancel-btn { padding: 8px 16px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; transition: all var(--dur-1) var(--ease-out); }
+.ship-btn { padding: 8px 16px; background: var(--warning); border: 1px solid var(--warning); color: #fff; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; transition: all var(--dur-1) var(--ease-out); }
+.receive-btn { padding: 8px 16px; background: var(--primary); border: 1px solid var(--primary); color: #fff; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; transition: all var(--dur-1) var(--ease-out); }
 
 .section {
   background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px;
