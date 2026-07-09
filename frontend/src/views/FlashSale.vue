@@ -45,35 +45,35 @@ onUnmounted(() => {
 // sold: 已抢百分比（驱动进度条）
 const flashItems = ref([
   {
-    id: 'f-iphone15', name: 'iPhone 15 Pro 256G', image: '/images/iphone15.jpg',
+    id: 'f-iphone15', productId: 1, name: 'iPhone 15 Pro 256G', image: '/images/iphone15.jpg',
     originalPrice: 8999, flashPrice: 7299, sold: 68, status: 'live',
   },
   {
-    id: 'f-macbook', name: 'MacBook Air M3', image: '/images/macbook.jpg',
+    id: 'f-macbook', productId: 3, name: 'MacBook Air M3', image: '/images/macbook.jpg',
     originalPrice: 8999, flashPrice: 6799, sold: 41, status: 'live',
   },
   {
-    id: 'f-dyson', name: 'Dyson V12 吸尘器', image: '/images/dyson.jpg',
+    id: 'f-dyson', productId: 5, name: 'Dyson V12 吸尘器', image: '/images/dyson.jpg',
     originalPrice: 4290, flashPrice: 2999, sold: 83, status: 'live',
   },
   {
-    id: 'f-sonyxm5', name: 'Sony WH-1000XM5', image: '/images/sonyxm5.jpg',
+    id: 'f-sonyxm5', productId: 4, name: 'Sony WH-1000XM5', image: '/images/sonyxm5.jpg',
     originalPrice: 2899, flashPrice: 1999, sold: 56, status: 'live',
   },
   {
-    id: 'f-mate60', name: '华为 Mate 60 Pro', image: '/images/mate60.jpg',
+    id: 'f-mate60', productId: 2, name: '华为 Mate 60 Pro', image: '/images/mate60.jpg',
     originalPrice: 6999, flashPrice: 5799, sold: 0, status: 'upcoming',
   },
   {
-    id: 'f-mitv', name: '小米电视 S Pro 75"', image: '/images/mitv.jpg',
+    id: 'f-mitv', productId: 9, name: '小米电视 S Pro 75"', image: '/images/mitv.jpg',
     originalPrice: 5599, flashPrice: 3999, sold: 0, status: 'upcoming',
   },
   {
-    id: 'f-aj1', name: 'Air Jordan 1 Mid', image: '/images/aj1.jpg',
+    id: 'f-aj1', productId: 6, name: 'Air Jordan 1 Mid', image: '/images/aj1.jpg',
     originalPrice: 1199, flashPrice: 799, sold: 100, status: 'ended',
   },
   {
-    id: 'f-ipadair', name: 'iPad Air 11" M2', image: '/images/ipadair.jpg',
+    id: 'f-ipadair', productId: 11, name: 'iPad Air 11" M2', image: '/images/ipadair.jpg',
     originalPrice: 4799, flashPrice: 3899, sold: 100, status: 'ended',
   },
 ])
@@ -95,14 +95,14 @@ function discount(item) {
 }
 
 function goDetail(item) {
-  // 秒杀商品复用普通详情路由（按主键透传，便于后续接真实数据）
-  router.push({ name: 'ProductDetail', params: { id: item.id.replace('f-', '') } })
+  // 秒杀商品复用普通详情路由（用真实商品主键，后端可正确核价/扣库存）
+  router.push({ name: 'ProductDetail', params: { id: item.productId } })
 }
 
 function buyNow(item) {
   if (item.status !== 'live') return
   const payload = {
-    id: item.id,
+    id: item.productId, // 真实商品主键，下单时后端能正确核价与扣库存
     name: item.name,
     image: item.image,
     price: item.flashPrice,

@@ -89,6 +89,12 @@ const routes = [
         component: () => import('../views/News.vue'),
         meta: { title: '玩机资讯' },
       },
+      {
+        path: 'news/:id',
+        name: 'NewsDetail',
+        component: () => import('../views/NewsDetail.vue'),
+        meta: { title: '资讯详情' },
+      },
     ],
   },
   {

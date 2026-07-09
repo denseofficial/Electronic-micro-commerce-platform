@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { ElMessage } from 'element-plus'
 
 // ============ 会员等级阶梯（青铜 / 白银 / 黄金 / 钻石） ============
 const TIERS = [
@@ -33,7 +35,6 @@ const TIERS = [
 // ============ 当前会员状态（mock，可由接口覆盖） ============
 const authStore = useAuthStore()
 const currentTierKey = 'gold'
-const points = ref(1680)
 
 const currentTierIndex = computed(() =>
   TIERS.findIndex((t) => t.key === currentTierKey),
@@ -61,56 +62,80 @@ onMounted(() => {
   })
 })
 
-// ============ 赚积分任务（mock，本地可领取） ============
-const tasks = ref([
-  {
-    key: 'signin',
-    title: '每日签到',
-    desc: '连续签到领取更多积分',
-    points: 10,
-    action: '签到',
-    claimed: false,
-  },
-  {
-    key: 'profile',
-    title: '完善资料',
-    desc: '补全个人资料立得积分',
-    points: 50,
-    action: '去完成',
-    claimed: false,
-  },
-  {
-    key: 'review',
-    title: '评价订单',
-    desc: '为已完成订单写评价',
-    points: 20,
-    action: '去完成',
-    claimed: false,
-  },
-  {
-    key: 'share',
-    title: '分享商品',
-    desc: '分享心仪好物给好友',
-    points: 15,
-    action: '去完成',
-    claimed: false,
-  },
-])
-
-function claim(task) {
-  if (task.claimed) return
-  task.claimed = true
+// ============ 会员状态本地持久化（mock，跨页面导航/刷新不丢） ============
+const router = useRouter()
+const LS_KEY = 'ec_membership_v1'
+const TASK_ROUTES = {
+  profile: { name: 'UserCenter' },
+  review: { name: 'OrderList' },
+  share: { name: 'Home' },
 }
-
-// ============ 积分明细（mock 6 条） ============
-const history = ref([
+const TASKS_DEFAULT = [
+  { key: 'signin', title: '每日签到', desc: '连续签到领取更多积分', points: 10, action: '签到', claimed: false },
+  { key: 'profile', title: '完善资料', desc: '补全个人资料立得积分', points: 50, action: '去完成', claimed: false },
+  { key: 'review', title: '评价订单', desc: '为已完成订单写评价', points: 20, action: '去完成', claimed: false },
+  { key: 'share', title: '分享商品', desc: '分享心仪好物给好友', points: 15, action: '去完成', claimed: false },
+]
+const HISTORY_DEFAULT = [
   { date: '2026-07-08', reason: '每日签到', delta: 10 },
   { date: '2026-07-07', reason: '购买 iPhone 15', delta: 200 },
   { date: '2026-07-06', reason: '评价订单 #88231', delta: 20 },
   { date: '2026-07-05', reason: '兑换 50 元券', delta: -500 },
   { date: '2026-07-03', reason: '分享商品', delta: 15 },
   { date: '2026-07-01', reason: '完善个人资料', delta: 50 },
-])
+]
+
+function loadMembership() {
+  try {
+    const raw = localStorage.getItem(LS_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch (e) {
+    /* 忽略损坏的本地数据 */
+  }
+  return null
+}
+const savedM = loadMembership()
+
+const points = ref(savedM?.points ?? 1680)
+const tasks = ref(
+  TASKS_DEFAULT.map((t) => ({ ...t, claimed: savedM?.claimed?.includes(t.key) ?? false })),
+)
+const history = ref(savedM?.history ?? HISTORY_DEFAULT)
+
+function persistMembership() {
+  try {
+    localStorage.setItem(
+      LS_KEY,
+      JSON.stringify({
+        points: points.value,
+        history: history.value,
+        claimed: tasks.value.filter((t) => t.claimed).map((t) => t.key),
+      }),
+    )
+  } catch (e) {
+    /* 存储空间不足时静默 */
+  }
+}
+
+function todayStr() {
+  const d = new Date()
+  const p = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
+}
+
+function claim(task) {
+  if (task.claimed) return
+  // 修复：原实现仅标记 claimed，未累加积分 / 写入明细 / 跳转面板
+  points.value += task.points
+  displayPct.value = progressPct.value
+  history.value.unshift({ date: todayStr(), reason: task.title, delta: task.points })
+  task.claimed = true
+  persistMembership()
+  ElMessage.success(`已领取 ${task.points} 积分`)
+  // 去完成类任务：跳转到对应业务面板
+  const target = TASK_ROUTES[task.key]
+  if (target) router.push(target)
+}
 </script>
 
 <template>
