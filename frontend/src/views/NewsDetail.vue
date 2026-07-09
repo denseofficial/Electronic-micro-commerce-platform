@@ -64,6 +64,7 @@ function initials(name) {
 
       <article class="body" v-reveal>
         <p class="body__lead">{{ article.excerpt }}</p>
+        <div class="body__rich" v-html="article.body"></div>
         <p>
           这是一篇来自《玩机志》的{{ article.category }}内容。我们把两周的真实使用、实测数据与一手上手体验整理成这篇长文，希望在你做购买决策、或单纯围观时都能有一点帮助。
         </p>
@@ -208,6 +209,11 @@ function initials(name) {
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1.5;
+}
+.body__rich {
+  font-size: var(--text-lg);
+  line-height: var(--lh-body);
+  color: var(--text-secondary);
 }
 .body__quote {
   margin: 0;

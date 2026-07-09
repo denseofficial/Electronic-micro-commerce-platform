@@ -136,7 +136,7 @@ async function shareProduct() {
       <!-- 商品信息 -->
       <div class="detail__info">
         <h1 class="info__name">{{ product.name }}</h1>
-        <p class="info__desc">{{ product.description }}</p>
+        <p class="info__desc" v-text="product.description"></p>
 
         <div class="price-box">
           <div class="price-box__main">

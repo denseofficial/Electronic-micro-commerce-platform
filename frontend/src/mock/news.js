@@ -12,6 +12,8 @@ export const articles = [
     author: '陈野',
     date: '2026-07-08',
     readTime: 12,
+    // 富文本正文：仅用于 v-html 渲染，内容为项目自带的可信来源，非用户输入
+    body: '钛金属机身带来的<strong>轻量化</strong>是第一直觉，但真正让它「好用」的是长焦与<em>操作按钮</em>的重新校准——不堆参数，只聊真实体验。两周主力机使用下来，它的取舍与惊喜都写在了这篇长文里。',
   },
   {
     id: 2,
@@ -23,6 +25,7 @@ export const articles = [
     author: '林深',
     date: '2026-07-06',
     readTime: 9,
+    body: '在无地面网络的<strong>山野与海上</strong>，我们真的打通了卫星电话。这篇手把手教你什么时候该开、怎么开<em>最省电</em>，以及哪些场景下它才是真正的救命功能。',
   },
   {
     id: 3,
@@ -34,6 +37,7 @@ export const articles = [
     author: '苏晚',
     date: '2026-07-05',
     readTime: 6,
+    body: '供应链消息指明年多款旗舰平板转投 <strong>OLED</strong>，色彩与对比之外，更便宜的产线才是<em>关键推手</em>。当显示规格不再稀缺，价格战才刚刚开始。',
   },
   {
     id: 4,
@@ -45,6 +49,7 @@ export const articles = [
     author: '周野',
     date: '2026-07-03',
     readTime: 8,
+    body: '三个月、三条地铁线之后，它赢在的不是参数，而是<strong>「戴着就不想摘下来」</strong>的舒适区。降噪不是数字游戏，而是日常里被悄悄抹平的噪音。',
   },
   {
     id: 5,
@@ -56,6 +61,7 @@ export const articles = [
     author: '阿澈',
     date: '2026-07-02',
     readTime: 7,
+    body: '一支视频带你看过外观、接口与一天真实续航，结尾还有和旧款的<em>重量实测对比</em>。轻薄与续航，这次终于不再二选一。',
   },
   {
     id: 6,
@@ -67,6 +73,7 @@ export const articles = [
     author: '何夕',
     date: '2026-06-30',
     readTime: 10,
+    body: '细软塌、自然卷、油性头皮各有解法。我们按发质拆开讲，别再为<strong>用不上的档位</strong>多花钱。选对风嘴，比选贵型号更重要。',
   },
   {
     id: 7,
@@ -78,6 +85,7 @@ export const articles = [
     author: '江临',
     date: '2026-06-28',
     readTime: 5,
+    body: '当百寸面板成本被压到新低，客厅大屏的门槛正在快速消失，<em>内容生态</em>却还没跟上。硬件先行，软件补课，这是大屏行业的老剧本。',
   },
   {
     id: 8,
@@ -89,6 +97,7 @@ export const articles = [
     author: '老周',
     date: '2026-06-26',
     readTime: 11,
+    body: '同一双鞋，不同年份的皮料、走线与鞋型都在变。老玩家教你一眼分辨<strong>「正代」与「简版」</strong>。情怀之外，做工才是复刻的分水岭。',
   },
 ]
 
