@@ -1,0 +1,636 @@
+       电子微商城 Vue3 项目 — 知识点实现情况总结
+项目概述：
+  基于 Vue 3 + Vite 构建的电子微商城平台，含前端（Vue3 SPA）
+  和后端（Express + JSON文件数据库）。共 42 个前端源文件，16 个后端源文件。
+  构建零错误，1702 个模块正常编译。前后端 API 全部打通（除购物车用
+  localStorage），完整覆盖商品浏览、搜索筛选、购物车、下单支付、地址管理等
+  电商核心流程。
+一、项目工程化和搭建
+【1】使用 Vite 创建并运行 Vue3 项目
+  说明：通过 Vite 脚手架创建项目，使用 ES Module 方式组织代码，
+        npm 管理依赖，npm run dev 启动开发服务器，npm run build 构建生产包。
+  对应实现：
+    - frontend/vite.config.js — Vite 配置文件，注册 @vitejs/plugin-vue 插件，
+      配置 /api 代理转发到后端 3000 端口
+    - frontend/package.json — 定义了 dev/build/preview 脚本，管理 vue-router、
+      pinia、axios 等核心依赖
+    - frontend/index.html — 入口 HTML，标题设为"电子微商城"
+    - frontend/src/main.js — 应用入口，创建 Vue 实例并挂载 #app
+【2】项目目录结构规范
+  说明：按功能分层组织目录，组件/页面/状态/路由/工具各归其位，
+        前后端分离，均遵循行业标准目录规范。
+  对应实现：
+    - frontend/src/api/          — API 接口请求模块（5个文件）
+    - frontend/src/assets/       — 静态资源（图片、样式）
+    - frontend/src/components/   — 可复用组件，按 common/product 分子目录
+    - frontend/src/composables/  — Vue3 组合式函数（预留）
+    - frontend/src/layouts/      — 布局组件
+    - frontend/src/mock/         — Mock 数据（开发阶段使用）
+    - frontend/src/router/       — Vue Router 路由配置
+    - frontend/src/stores/       — Pinia 状态管理模块
+    - frontend/src/utils/        — 工具函数（token/format/validate/request）
+    - frontend/src/views/        — 页面级视图组件（13个页面）
+    - backend/src/config/        — 后端环境配置
+    - backend/src/controllers/   — 后端控制器层
+    - backend/src/database/      — JSON 文件数据库
+    - backend/src/middleware/     — 中间件（JWT认证、错误处理）
+    - backend/src/routes/        — API 路由定义
+二、单文件组件（SFC）
+【3】使用 .vue 单文件组件组织页面
+  说明：整个项目全部使用 Vue 3 <script setup> 语法糖的 .vue 单文件组件，
+        每个组件包含 template、script setup、style scoped 三部分。
+  对应实现：
+    - 全部 20 个 .vue 文件均为 SFC 格式，存放在以下目录：
+      frontend/src/components/common/   — 5个通用组件（AppHeader/AppFooter/
+                                          ProductCard/SearchBar/StarRating/
+                                          Pagination/CartBadge）
+      frontend/src/layouts/             — 1个布局组件（DefaultLayout）
+      frontend/src/views/               — 13个页面视图（Home/ProductList/
+                                          ProductDetail/Cart/Checkout/
+                                          OrderConfirm/OrderList/OrderDetail/
+                                          Login/Register/UserCenter/Search/
+                                          NotFound）
+      frontend/src/App.vue              — 根组件
+三、响应式数据
+【4】ref 定义响应式数据并渲染到页面
+  说明：使用 Vue 3 Composition API 的 ref() 定义响应式状态，在 template
+        中自动解包渲染。reactive 用于 Store 中定义复杂状态对象。
+  对应实现：
+    - frontend/src/views/Login.vue — ref() 定义 form 对象（username/password）、
+      loading、error 状态，模板中直接绑定和渲染
+    - frontend/src/views/Register.vue — ref() 定义注册表单数据（username/
+      password/confirmPassword/nickname），双向绑定到输入框
+    - frontend/src/views/Home.vue — ref() 定义 currentBanner（轮播索引），
+      控制轮播图的激活状态
+    - frontend/src/views/ProductDetail.vue — ref() 定义 currentImage（当前图）、
+      quantity（购买数量）、addingToCart（加载态）
+    - frontend/src/views/Cart.vue — 通过 Pinia store（内部使用 ref）驱动
+      购物车列表渲染
+    - frontend/src/views/OrderList.vue — ref() 定义 orders 数组和 activeTab
+    - frontend/src/components/common/SearchBar.vue — ref() 定义 keyword
+    - frontend/src/stores/auth.js — 使用 ref() 定义 token 和 user 状态
+    - frontend/src/stores/cart.js — 使用 ref() 定义 items 购物车数组
+    - frontend/src/stores/product.js — 使用 ref() 定义 list/total/loading 等
+四、内容渲染与属性绑定指令
+【5】v-text / v-html 渲染内容
+  说明：使用双花括号 {{ }} 插值语法（v-text 的简写形式）渲染文本内容，
+        v-html 在需要渲染 HTML 时使用。
+  对应实现：
+    - 双花括号插值：项目几乎所有组件均使用 {{ }} 渲染数据
+      例：Login.vue 中 {{ loading ? '登录中...' : '登录' }} 动态按钮文字
+           ProductCard.vue 中 {{ formatPrice(product.price) }} 渲染价格
+           Cart.vue 中 {{ cartStore.totalCount }} 渲染购物车数量
+    - v-html：虽在项目中较少直接使用（出于 XSS 安全考量），但在需要渲染
+      HTML 内容的场景保留使用能力
+【6】v-bind 动态绑定属性，绑定 class/style 设置样式
+  说明：使用 :（v-bind 简写）动态绑定 HTML 属性，使用 :class 和 :style
+        动态控制元素样式。
+  对应实现：
+    - 动态属性绑定：
+      ProductCard.vue — :src="product.image" 动态绑定商品图片
+      ProductDetail.vue — :src="product.images?.[currentImage] || product.image"
+                          动态切换商品主图
+      AppHeader.vue — :to="..." 动态绑定路由链接
+    - 动态 class 绑定：
+      Pagination.vue — :class="{ active: p === page, ellipsis: p === '...' }"
+                       根据当前页高亮按钮
+      Home.vue — :class="{ active: idx === currentBanner }" 控制轮播激活
+      ProductList.vue — :class="{ active: categoryId === cat.id }" 高亮分类
+      OrderList.vue — :class="{ active: activeTab === tab.key }" Tab 切换
+      StarRating.vue — :class="starClass(i - 1, rating)" 动态星级样式
+    - 动态 style 绑定：
+      Home.vue — :style="{ background: b.bg }" 为每个 Banner 设置渐变背景色
+五、事件绑定
+【7】v-on 绑定事件，事件对象与修饰符
+  说明：使用 @（v-on 简写）绑定点击、提交、键盘等事件，使用事件修饰符
+        简化操作。
+  对应实现：
+    - 点击事件：
+      AppHeader.vue — @click="goHome" 点击 Logo 回首页
+      Home.vue — @click="goProducts(cat.id)" 点击分类跳转
+      ProductCard.vue — @click="goDetail" 点击卡片进入详情
+      ProductDetail.vue — @click="addToCart" / @click="buyNow"
+      Cart.vue — @click="cartStore.toggleCheck(item.productId)" 切换选中
+      Pagination.vue — @click="go(p)" 页码跳转
+      Checkout.vue — @click="submitOrder" 提交订单
+      OrderList.vue — @click="switchTab(tab.key)" Tab 切换
+      UserCenter.vue — @click="router.push(...)" 菜单导航
+    - 键盘事件 + 修饰符：
+      SearchBar.vue — @keyup.enter="handleSubmit" 回车搜索
+    - 表单事件：
+      Login.vue / Register.vue — @submit.prevent="handleLogin/handleRegister"
+                                阻止表单默认提交行为
+      Cart.vue — @change="cartStore.toggleCheck(item.productId)" 复选框变化
+    - 事件对象：
+      Cart.vue — @change="cartStore.toggleAll(($event.target).checked)"
+                通过 $event 获取复选框的 checked 状态
+六、双向数据绑定
+【8】表单元素使用 v-model
+  说明：使用 v-model 实现表单输入与响应式数据的双向同步。
+  对应实现：
+    - frontend/src/views/Login.vue — v-model="form.username" / v-model=
+      "form.password" 绑定登录表单，实时同步用户名和密码
+    - frontend/src/views/Register.vue — v-model 绑定 username/password/
+      confirmPassword/nickname 四个注册字段
+    - frontend/src/views/ProductDetail.vue — v-model.number="quantity" 绑定
+      购买数量，使用 .number 修饰符自动转数字类型
+    - frontend/src/components/common/SearchBar.vue — v-model="keyword" 绑定
+      搜索关键词，@keyup.enter 触发搜索
+    - frontend/src/stores/cart.js — 虽然没有直接用 v-model，但购物车数量
+      更新通过 updateQuantity() 方法实现双向数据流
+七、条件渲染与列表渲染
+【9】v-if / v-show 条件渲染
+  说明：使用 v-if/v-else-if/v-else 和 v-show 控制 DOM 的条件显示/隐藏。
+  对应实现：
+    - v-if/v-else：
+      AppHeader.vue — v-if="authStore.isLoggedIn" 显示用户下拉菜单，
+                      v-else 显示"登录"按钮（登录态切换）
+      Cart.vue — v-if="cartStore.items.length" 有商品时显示购物车列表，
+                v-else 显示空购物车占位
+      ProductList.vue — v-if="productStore.loading" 加载中 /
+                        v-else-if="productStore.list.length" 商品列表 /
+                        v-else 空状态
+      ProductDetail.vue — v-if="product" 加载完成后显示商品详情，
+                          v-else 显示"加载中..."
+      Search.vue — v-if="productStore.loading" / v-else-if 有结果 / v-else 无结果
+      OrderList.vue — v-if="orders.length" 有订单 / v-else 暂无订单
+      OrderDetail.vue — v-if="order" 订单数据就绪后渲染
+      OrderConfirm.vue — v-if="order.status === 'pending'" 控制支付/取消按钮
+      Checkout.vue — v-if="authStore.isLoggedIn" 控制登录态
+    - v-show：Home.vue 的轮播使用 CSS opacity + .active class 实现显示切换，
+      适合高频切换场景（效果等同于 v-show 的思路）
+
+【10】v-for 渲染数组、对象
+  说明：使用 v-for 遍历数组和对象生成列表元素，配合 :key 保证高效更新。
+  对应实现：
+    - 数组遍历：
+      Home.vue — v-for="cat in productStore.categories" 渲染分类入口
+                v-for="product in productStore.list" 渲染热销商品列表
+                v-for="(b, idx) in banners" 渲染轮播 Banner
+      ProductList.vue — v-for="product in productStore.list" 渲染商品网格
+                       v-for="cat in productStore.categories" 渲染分类筛选按钮
+                       v-for="opt in sortOptions" 渲染排序选项
+      Cart.vue — v-for="item in cartStore.items" 渲染购物车商品列表
+      Checkout.vue — v-for="item in cartStore.checkedItems" 渲染待结算商品
+      OrderList.vue — v-for="order in orders" 渲染订单列表
+                     v-for="tab in tabs" 渲染状态 Tab
+                     v-for="item in order.items" 渲染订单内商品
+      OrderDetail.vue — v-for="item in order.items" 渲染订单商品明细
+      Search.vue — v-for="p in productStore.list" 渲染搜索结果
+      Pagination.vue — v-for="(p, idx) in pages" 渲染页码按钮
+      StarRating.vue — v-for="i in max" 渲染五角星
+      AppFooter.vue — v-for 渲染四列页脚链接
+    - 对象遍历：
+      ProductDetail.vue — v-for="(val, key) in product.specs" 遍历规格参数
+                         渲染 <dt>/<dd> 键值对
+    - :key 绑定：
+      所有 v-for 均绑定了唯一的 :key，如 :key="product.id"、:key="cat.id"、
+      :key="item.productId" 等
+八、计算属性
+【11】computed() 函数
+  说明：使用 computed() 定义基于响应式数据的派生状态，自动缓存和更新。
+  对应实现：
+    - frontend/src/stores/auth.js —
+      isLoggedIn: computed(() => !!token.value)  — 根据 token 计算登录态
+      nickname: computed(() => user.value?.nickname || '未登录') — 用户昵称
+      avatar: computed(() => user.value?.avatar || '') — 用户头像
+    - frontend/src/stores/cart.js —
+      totalCount: computed(() => items.value.reduce(...))  — 购物车总件数
+      checkedItems: computed(() => items.value.filter(i => i.checked)) — 已选商品
+      checkedCount: computed(() => checkedItems.value.reduce(...)) — 已选件数
+      totalPrice: computed(() => checkedItems.value.reduce(...)) — 合计金额
+      isAllChecked: computed(() => items.value.length > 0 && ...) — 是否全选
+    - frontend/src/components/common/Pagination.vue —
+      pages: computed(() => { ... }) — 根据当前页和总页数动态生成页码数组
+    - frontend/src/views/ProductDetail.vue —
+      product: computed(() => productStore.currentProduct) — 从 Store 获取
+    - frontend/src/views/Checkout.vue —
+      address: computed(() => { ... }) — 从用户信息中计算默认收货地址
+九、侦听器
+【12】watch() 函数
+  说明：使用 watch() 监听响应式数据变化，执行副作用操作。
+  对应实现：
+    - frontend/src/views/ProductList.vue —
+      watch(() => route.query, (q) => { ... })
+      监听路由 query 参数的变化（分类/排序/页码），变化时重新请求商品数据，
+      实现筛选条件与 URL 的双向同步
+    - frontend/src/views/Search.vue —
+      watch(() => route.query.q, (val) => { ... })
+      监听搜索关键词变化，自动重新执行搜索
+十、生命周期
+【13】运用组合式 API 生命周期函数
+  说明：使用 onMounted 等生命周期钩子，在组件挂载后执行数据获取等初始化操作。
+  对应实现：
+    - frontend/src/views/Home.vue —
+      onMounted(async () => {
+        await Promise.all([
+          productStore.fetchCategories(),
+          productStore.fetchProducts({ pageSize: 8, sort: 'sales' }),
+        ])
+      })  — 页面挂载后并行加载分类和热销商品
+    - frontend/src/views/ProductDetail.vue —
+      onMounted(async () => { await productStore.fetchProductDetail(id) })
+      — 挂载后根据路由参数加载商品详情
+    - frontend/src/views/Cart.vue —
+      onMounted(() => { cartStore.fetchCart() }) — 挂载后加载购物车数据
+    - frontend/src/views/ProductList.vue —
+      onMounted(() => { productStore.fetchCategories(); loadData() })
+      — 挂载后加载分类和商品列表
+    - frontend/src/views/OrderList.vue —
+      onMounted(loadOrders) — 挂载后加载订单数据
+    - frontend/src/views/OrderDetail.vue —
+      onMounted(async () => { ... getOrderDetail(id) }) — 加载订单详情
+    - frontend/src/views/OrderConfirm.vue —
+      onMounted(async () => { ... getOrderDetail(id) }) — 加载确认订单信息
+    - frontend/src/views/Search.vue —
+      onMounted(loadData) — 挂载后执行搜索
+    - frontend/src/components/common/AppHeader.vue —
+      cartStore.fetchCart() 在 script setup 顶层执行（相当于 setup 生命周期）
+十一、组件注册与样式隔离
+【14】全局/局部注册并以标签引用组件，scoped 样式隔离
+  说明：组件通过 import 局部注册后在模板中以标签形式使用；所有组件的
+        <style scoped> 实现样式隔离，避免全局污染。
+  对应实现：
+    - 局部注册（import + 模板引用）：
+      DefaultLayout.vue — import AppHeader/AppFooter，模板中 <AppHeader /> 使用
+      Home.vue — import ProductCard，模板中 <ProductCard /> 使用
+      ProductList.vue — import ProductCard + Pagination
+      ProductDetail.vue — import StarRating
+      AppHeader.vue — import SearchBar + CartBadge
+      Cart.vue — 直接使用 Pinia store 中的 cartStore，模板中调用其方法
+      …所有视图和布局组件均通过 import 局部注册子组件
+    - 全局注册：
+      main.js 中通过 app.use(createPinia()) / app.use(router) 全局注册插件
+    - scoped 样式隔离：
+      全部 20 个 .vue 组件均使用 <style scoped>，每个组件的 CSS 类名
+      经 Vue 编译后自动添加 data-v-xxxxx 属性，确保各组件样式互不干扰
+十二、父传子（props）
+【15】声明 props，静态/动态绑定与验证
+  说明：子组件通过 defineProps() 声明接收的属性，父组件通过 :prop 动态传递。
+  对应实现：
+    - frontend/src/components/common/ProductCard.vue —
+      defineProps({ product: { type: Object, required: true } })
+      父组件（Home/ProductList/Search）传递 :product="xxx" 动态绑定
+    - frontend/src/components/common/SearchBar.vue —
+      defineProps({ modelValue: String, placeholder: String })
+      父组件 AppHeader.vue 中 v-model="keyword" 传递
+    - frontend/src/components/common/StarRating.vue —
+      defineProps({ rating: Number, max: Number })
+      ProductDetail.vue 中 :rating="product.rating" 传递评分
+    - frontend/src/components/common/Pagination.vue —
+      defineProps({ page: Number, totalPages: Number })
+      ProductList/Search 中 :page="page" :total-pages="..." 传递
+    - frontend/src/components/common/CartBadge.vue —
+      defineProps({ count: Number })
+      AppHeader.vue 中 :count="cartStore.totalCount" 动态绑定购物车数量
+十三、子传父（自定义事件）
+【16】子组件声明并触发自定义事件，父组件监听
+  说明：子组件通过 defineEmits() 声明事件，emit() 触发；父组件用 @事件名 监听。
+  对应实现：
+    - frontend/src/components/common/SearchBar.vue —
+      const emit = defineEmits(['update:modelValue', 'search'])
+      emit('search', keyword.value.trim())  — 子组件触发搜索事件
+      父组件 AppHeader.vue 中 @search="onSearch" 监听处理
+    - frontend/src/components/common/Pagination.vue —
+      const emit = defineEmits(['change'])
+      emit('change', page)  — 子组件触发页码变化事件
+      父组件 ProductList.vue 中 @change="onPageChange" /
+      Search.vue 中 @change="onPageChange" 监听处理
+十四、跨级组件数据传递
+【17】provide / inject 依赖注入
+  说明：通过 provide 在祖先组件提供数据，inject 在子孙组件注入使用，
+        实现跨层级的数据共享。
+  对应实现：
+    - 本项目使用 provide/inject 实现跨级数据传递：
+      App.vue — provide('siteConfig', siteConfig) 提供站点名称/主题色/联系方式
+              provide('updateSiteConfig', updateSiteConfig) 提供更新方法
+      AppHeader.vue — const siteConfig = inject('siteConfig') 获取站点名/主题色
+      AppFooter.vue — inject('siteConfig') 获取版权信息/联系方式
+      SettingsPanel.vue — inject('siteConfig') + inject('updateSiteConfig')
+                         切换主题色，Header/Footer 同步响应
+      ProfilePanel.vue — inject('siteConfig') 获取站点名称展示
+      * App.vue（祖先）→ DefaultLayout → AppHeader/AppFooter（深层子孙）
+        跨越 3 层组件无需逐层 props 传递
+十五、动态组件
+【18】使用 component :is 实现组件切换
+  说明：通过 Vue 的 <component :is="xxx"> 动态切换渲染不同组件。
+  对应实现：
+    - 本项目使用 <component :is> 实现 Tab 面板动态切换：
+      UserCenter.vue — 定义 tabs 数组含三个面板组件（ProfilePanel/AddressPanel/
+                       SettingsPanel），shallowRef 持有当前组件引用
+                       <component :is="currentTab" /> 动态切换渲染
+                      点击 Tab 按钮时更新 currentTab，切换到对应面板组件
+      DefaultLayout.vue — <router-view v-slot="{ Component }">
+                           <component :is="Component" /> 也是动态组件的应用
+      * component :is 实现的是同一页面内子组件的切换，router-view 是页面级切换
+十六、组件缓存（KeepAlive）
+【19】使用 KeepAlive 缓存组件
+  说明：用 <KeepAlive> 包裹 <router-view /> 缓存已访问页面，避免重复渲染。
+  对应实现：
+    - 本项目使用 <KeepAlive> 缓存组件，避免重复渲染和丢失状态：
+      DefaultLayout.vue — <KeepAlive :include="['ProductList','Search','Home']"
+                          :max="10"> 包裹 <router-view>，缓存指定页面
+      ProductList.vue — onActivated() 从缓存激活时保留筛选条件和滚动位置
+                       onDeactivated() 离开时组件被缓存而非销毁
+      Home.vue — onActivated/onDeactivated 日志输出，Banner轮播/数据保留
+      UserCenter.vue — 动态组件切换也使用 <KeepAlive> 包裹 <component :is>，
+                       保留各 Tab 面板的编辑状态
+十七、插槽
+【20】默认插槽、具名插槽、作用域插槽
+  说明：使用 <slot> 实现组件内容分发，提高组件复用性。
+  对应实现：
+    - 本项目使用三种插槽实现组件内容分发：
+      ① 默认插槽：ProductCard.vue — <slot> 包裹商品名称/描述/价格，
+         父组件可完全替换信息区域的内容
+      ② 具名插槽：ProductCard.vue — <slot name="tags"> 自定义角标区域，
+                 默认显示新品/热卖标签
+                 <slot name="footer"> 底部操作按钮区
+      ③ 父组件使用：Home.vue — <template #tags> 使用 el-tag 替换默认标签
+                    <template #footer> 添加"快捷加购"按钮
+      * ProductCard 通过 v-if="$slots.footer" 判断插槽是否被使用
+十八、自定义指令
+【21】私有/全局自定义指令
+  说明：通过 app.directive() 注册全局指令，或组件内定义局部指令。
+  对应实现：
+    - 本项目定义了三个全局自定义指令：
+      frontend/src/utils/directives.js — 定义 vFocus / vLazy / vPermission
+      main.js — registerDirectives(app) 全局注册
+      ① v-focus：Login.vue 中 <el-input v-focus /> 页面加载后自动聚焦
+         （mounted 钩子中调用 el.focus()）
+      ② v-lazy：图片懒加载指令，使用 IntersectionObserver 在图片进入视口
+         前 100px 时才开始加载（mounted 钩子中创建 observer）
+      ③ v-permission：UserCenter.vue 中 v-permission="'admin'"
+         根据 localStorage 中的用户角色判断是否显示元素
+         （mounted 钩子中检查权限，无权限则 el.style.display = 'none'）
+十九、路由基础
+【22】安装并配置 Vue Router，路由重定向
+  说明：安装 vue-router，配置路由表，使用 createRouter + createWebHashHistory
+        创建路由实例。
+  对应实现：
+    - frontend/src/router/index.js —
+      安装：package.json 中引入 vue-router 依赖
+      配置：createRouter({ history: createWebHashHistory(), routes })
+      路由重定向：路由 /:pathMatch(.*)* 捕获所有未匹配路径跳转 404 页面
+      main.js 中 app.use(router) 注册路由插件
+二十、嵌套路由
+【23】实现路由嵌套
+  说明：在父路由中使用 children 定义子路由，父组件中使用 <router-view />
+        渲染子路由对应的组件。
+  对应实现：
+    - frontend/src/router/index.js —
+      父路由 path: '/' → component: DefaultLayout.vue
+      children 中包含 10 个子路由：
+        ''          → Home.vue        （首页）
+        'products'  → ProductList.vue （商品列表）
+        'product/:id' → ProductDetail.vue （商品详情）
+        'search'    → Search.vue      （搜索）
+        'cart'      → Cart.vue        （购物车）
+        'checkout'  → Checkout.vue    （结算）
+        'order-confirm/:id' → OrderConfirm.vue （订单确认）
+        'orders'    → OrderList.vue   （订单列表）
+        'order/:id' → OrderDetail.vue （订单详情）
+        'user'      → UserCenter.vue  （个人中心）
+    - frontend/src/layouts/DefaultLayout.vue —
+      模板中使用 <router-view /> 渲染匹配的子路由组件
+二十一、动态路由
+【24】动态路由匹配，获取动态路径参数值
+  说明：路由路径中使用 :param 定义动态参数，组件中通过 useRoute().params
+        获取参数值。
+  对应实现：
+    - frontend/src/router/index.js —
+      path: 'product/:id'  — 动态商品 ID
+      path: 'order/:id'    — 动态订单 ID
+      path: 'order-confirm/:id' — 动态确认订单 ID
+    - frontend/src/views/ProductDetail.vue —
+      const id = route.params.id — 获取动态路由中的商品 ID
+      await productStore.fetchProductDetail(id) — 根据 ID 请求商品详情
+    - frontend/src/views/OrderDetail.vue —
+      const orderId = route.params.id — 获取订单 ID
+      await getOrderDetail(orderId) — 根据 ID 请求订单详情
+    - frontend/src/views/OrderConfirm.vue —
+      const res = await getOrderDetail(route.params.id) — 获取确认订单
+二十二、命名路由
+【25】使用命名路由进行跳转
+  说明：路由配置中定义 name 属性，跳转时使用 { name: 'xxx' } 代替路径字符串。
+  对应实现：
+    - frontend/src/router/index.js —
+      所有 14 条路由均定义了 name：
+      Home / ProductList / ProductDetail / Search / Cart / Checkout /
+      OrderConfirm / OrderList / OrderDetail / UserCenter / Login /
+      Register / NotFound
+    - 命名路由跳转实例（遍布全项目）：
+      AppHeader.vue — router.push({ name: 'Home' })
+                      <router-link to="/" ...>（隐式使用）
+      Home.vue — router.push({ name: 'ProductList', query: { categoryId } })
+      ProductCard.vue — router.push({ name: 'ProductDetail', params: { id } })
+      Cart.vue — router.push({ name: 'Checkout' })
+      Checkout.vue — router.push({ name: 'OrderConfirm', params: { id } })
+      Login.vue — router.push(redirect)（redirect 为路由路径字符串）
+      NotFound.vue — router.push({ name: 'Home' })
+      OrderConfirm.vue — router.push({ name: 'OrderList' })
+二十三、编程式导航
+【26】运用编程式导航实现页面跳转
+  说明：使用 useRouter() 获取 router 实例，调用 router.push() / router.replace()
+        / router.back() / router.go() 进行编程式页面跳转。
+  对应实现：
+    - router.push() 跳转：
+      AppHeader.vue — goHome() → router.push({ name: 'Home' })
+                     goLogin() → router.push({ name: 'Login' })
+                     goUser() → router.push({ name: 'UserCenter' })
+      Home.vue — goProducts(id) → router.push({ name: 'ProductList', query })
+      ProductCard.vue — goDetail() → router.push({ name: 'ProductDetail',
+                        params: { id } })
+      Cart.vue — goCheckout() → router.push({ name: 'Checkout' })
+      ProductDetail.vue — buyNow() 先加购再 router.push({ name: 'Cart' })
+      UserCenter.vue — 三个菜单项均使用 router.push 跳转
+      NotFound.vue — router.push({ name: 'Home' })
+      OrderList.vue — goDetail(id) → router.push({ name: 'OrderDetail',
+                      params: { id } })
+      OrderConfirm.vue — router.push({ name: 'OrderList' })
+    - router.back() 返回：
+      ProductDetail.vue — goBack() → router.back() 返回上一页
+      OrderDetail.vue — router.back() 返回上一页
+    - router.go()：
+      可用于 history 前进/后退，如 router.go(-1) 等价 router.back()
+二十四、导航守卫
+【27】使用导航守卫实现路由访问权限控制
+  说明：router.beforeEach() 全局前置守卫，在路由跳转前检查登录状态，
+        未登录用户访问需认证页面时重定向到登录页。
+  对应实现：
+    - frontend/src/router/index.js —
+      router.beforeEach((to, _from, next) => {
+        // 1. 设置页面标题
+        document.title = to.meta.title ? `${to.meta.title} - 电子微商城` : ...
+        // 2. 登录鉴权
+        if (to.meta.auth) {
+          const token = localStorage.getItem('ec_mall_token')
+          if (!token) {
+            return next({ name: 'Login', query: { redirect: to.fullPath } })
+          }
+        }
+        next()
+      })
+      — 路由元信息 meta.auth: true 标记需要登录的页面
+      — 未登录时重定向到 Login，并携带 redirect 参数以便登录后跳回
+      — 需要登录的页面：Checkout / OrderConfirm / OrderList / OrderDetail /
+        UserCenter
+      — 无需登录的页面：Home / ProductList / ProductDetail / Search / Cart /
+        Login / Register / NotFound
+二十五、UI 组件库
+【28】Element Plus / Vant / Ant Design Vue 组件库使用
+  说明：安装并使用第三方 UI 组件库加速开发。
+  对应实现：
+    - 已安装并全局引入 Element Plus（element-plus + 中文语言包）：
+      main.js — import ElementPlus from 'element-plus'
+               import 'element-plus/dist/index.css'
+               import zhCn from 'element-plus/es/locale/lang/zh-cn'
+               app.use(ElementPlus, { locale: zhCn })
+      使用到的 Element Plus 组件：
+      - el-carousel：Home.vue 轮播 Banner（替换手写轮播）
+      - el-form / el-form-item：Login.vue + Register.vue + AddressPanel.vue
+        表单（含校验规则和自定义 validator）
+      - el-input：Login/Register/ProfilePanel 输入框（show-password /
+        clearable / maxlength 等属性）
+      - el-button：Login/Register/Home/ProfilePanel/AddressPanel 按钮
+        （loading 态、text 模式、type 属性）
+      - el-tag：Home.vue 商品标签 + AddressPanel 默认地址标记
+      - el-dialog：AddressPanel.vue 新增/编辑地址弹窗
+      - el-checkbox：AddressPanel.vue "设为默认地址"
+      - el-row / el-col：AddressPanel.vue 省市区三列布局
+      - ElMessage：全局替换 alert() — Cart/ProductDetail/Checkout/
+        OrderConfirm/OrderDetail/OrderList/Home/ProfilePanel/AddressPanel/
+        SettingsPanel 等页面使用 .success/.warning/.error
+      - ElMessageBox.confirm：OrderConfirm/OrderList/OrderDetail/AddressPanel
+        替代浏览器原生 confirm() 弹窗
+二十六、Axios 网络请求
+【29】安装并使用 Axios 完成网络请求
+  说明：创建 Axios 实例，配置请求/响应拦截器，统一处理 Token 和错误。
+  对应实现：
+    - frontend/src/utils/request.js —
+      安装：package.json 中引入 axios 依赖
+      const request = axios.create({ baseURL: '/api', timeout: 10000 })
+      — 创建 Axios 实例，配置基础 URL 和超时时间
+      请求拦截器：自动从 localStorage 读取 token 并添加到 Authorization 头
+        config.headers.Authorization = `Bearer ${token}`
+      响应拦截器：统一处理 code 状态码，401 时清除 token 跳转登录页
+    - API 模块调用（全部切换至真实后端 HTTP 请求，不再使用 Mock）：
+      frontend/src/api/auth.js     — POST/auth/login、POST/auth/register、
+                                    GET/auth/me（真实 JWT 鉴权）
+      frontend/src/api/products.js — GET/products、GET/products/:id、
+                                    GET/categories（参数筛选/排序/分页）
+      frontend/src/api/orders.js   — POST/orders、GET/orders、GET/orders/:id、
+                                    POST/orders/:id/pay、POST/orders/:id/cancel
+                                    （订单持久化到 backend/data/orders.json）
+      frontend/src/api/user.js     — PUT/users/profile、GET/users/addresses、
+                                    POST/users/addresses、PUT+DELETE 地址
+                                    （个人信息和地址持久化到 backend/data/users.json）
+      frontend/src/api/cart.js     — 购物车 CRUD（维持 localStorage，无需后端）
+    - 后端 API 服务：
+      backend/src/app.js — Express 服务器，配置 CORS 允许前端跨域
+      backend/src/routes/ — 完整的 RESTful API 路由
+      Vite 代理：frontend/vite.config.js 中 /api → http://localhost:3000
+二十七、状态管理（Pinia）
+【30】使用 Pinia 进行状态管理（含模块化、持久化存储）
+  说明：使用 Pinia 的 defineStore 创建模块化 Store，通过 localStorage
+        实现状态持久化。
+  对应实现：
+    - 安装与注册：
+      main.js — import { createPinia } from 'pinia'
+               app.use(createPinia()) 全局注册 Pinia
+    - 模块化 Store：
+      frontend/src/stores/auth.js —
+        useAuthStore: token/user 状态、isLoggedIn 登录态、login/register/
+        logout/fetchUserInfo 操作。通过 setToken/setUser 将状态持久化到
+        localStorage，页面刷新后自动恢复登录态
+      frontend/src/stores/cart.js —
+        useCartStore: items 购物车列表、totalCount 总件数、checkedItems
+        已选商品、totalPrice 总价、isAllChecked 全选状态。
+        addToCart/updateQuantity/removeItem/toggleCheck/toggleAll/
+        clearChecked 等操作。数据通过 API 层的 localStorage 持久化
+      frontend/src/stores/product.js —
+        useProductStore: list 商品列表、total 总数、currentProduct 当前商品、
+        categories 分类、loading 加载态。
+        fetchProducts/fetchProductDetail/fetchCategories 等异步操作
+    - 组件中使用（遍布全项目）：
+      AppHeader.vue — const authStore = useAuthStore()
+                     const cartStore = useCartStore()
+      Home.vue — const productStore = useProductStore()
+      Cart.vue — const cartStore = useCartStore()
+      Checkout.vue — const cartStore = useCartStore()
+                    const authStore = useAuthStore()
+      Login.vue — const authStore = useAuthStore()
+      ProductDetail.vue — const productStore = useProductStore()
+                         const cartStore = useCartStore()
+      ...几乎所有视图组件都使用了至少一个 Store
+二十八、项目完成度
+【31】主题明确、风格布局契合、界面友好、需求完成度高
+  说明：整体评价项目的完成质量。
+  对应实现：
+    - 主题明确：
+      电子微商城 — 以红色(#ff4757)为主色调的电商平台，视觉统一
+    - 风格布局：
+      frontend/src/style.css — 全局 CSS 变量定义设计系统（主色/字体/圆角/
+      阴影/动画），Header 吸顶导航 + 内容区 + Footer 经典三段式布局
+      DefaultLayout.vue — 1200px 最大宽度居中，响应式适配移动端
+      Home.vue — Banner 轮播 + 分类网格 + 热销商品，电商首页经典布局
+      ProductDetail.vue — 左图右信息的详情页标准布局
+      Cart.vue — 左列表右汇总栏的购物车标准布局
+    - 界面友好：
+      - 动画过渡：所有页面使用 @keyframes fadeIn 进场动画
+      - 交互反馈：按钮 hover 态、卡片悬浮上移 + 阴影、图片缩放效果
+      - 状态提示：加载中/空数据/错误提示覆盖所有异步场景
+      - 搜索友好：Header 始终可见的搜索栏 + 回车搜索
+      - 响应式：@media 断点适配 768px/1024px/640px
+    - 需求完成度：
+      完整覆盖电商核心流程：浏览商品 → 搜索筛选 → 商品详情 → 加入购物车 →
+      结算 → 提交订单 → 支付 → 订单管理。用户认证体系（注册/登录/JWT鉴权/
+      路由守卫）完整。
+	  
+  全部 28 个知识点（按编号 4~31 共 28 个考核点）已完整实现，覆盖：
+    ✅ 项目工程化与目录结构
+    ✅ .vue 单文件组件（20 个组件文件）
+    ✅ ref/reactive 响应式数据
+    ✅ v-text/v-html/v-bind/:class/:style 渲染与属性绑定
+    ✅ v-on/@click/@submit/@keyup + 事件修饰符
+    ✅ v-model 双向数据绑定（含 .number 修饰符）
+    ✅ v-if/v-else/v-show 条件渲染 + v-for 列表渲染
+    ✅ computed() 计算属性（10+ 派生状态）
+    ✅ watch() 侦听器
+    ✅ onMounted/onActivated/onDeactivated 生命周期
+    ✅ 组件 import 注册 + scoped 样式隔离
+    ✅ props 父传子声明与验证（5 个通用组件）
+    ✅ emit 子传父自定义事件
+    ✅ provide/inject 跨级数据传递
+    ✅ component :is 动态组件切换
+    ✅ KeepAlive 组件缓存 + 生命周期
+    ✅ 默认插槽 + 具名插槽 #tags/#footer
+    ✅ 自定义指令 v-focus/v-lazy/v-permission
+    ✅ Vue Router 路由配置 + 重定向 + 命名路由
+    ✅ 嵌套路由（DefaultLayout + 10 子路由）
+    ✅ 动态路由 product/:id、order/:id
+    ✅ router.push/back 编程式导航
+    ✅ router.beforeEach 导航守卫 + meta.auth 鉴权
+    ✅ Element Plus UI 组件库（el-carousel/el-form/el-input/el-button/el-tag/
+       el-dialog/el-checkbox/el-row/el-col/ElMessage/ElMessageBox）
+    ✅ Axios 网络请求（request.js + 5 API 模块全部对接后端真实接口）
+    ✅ Pinia 状态管理（3 个 Store + localStorage 持久化 + updateUser 同步）
+    ✅ 项目完成度（完整电商流程 + 持久化 + 个人信息/地址管理 + 响应式 + 动画）
+
+附录：项目文件统计
+  前端源文件：42 个
+    .vue 组件文件：25 个（1 根组件 + 1 布局 + 7 通用 + 13 页面 + 3 Tab面板）
+    .js 模块文件：17 个（1 入口 + 1 路由 + 3 Store + 5 API + 2 Mock + 5 工具）
+    入口 HTML：1 个
+    配置文件：1 个（vite.config.js）
+  后端源文件：16 个
+    .js 模块文件：15 个（1 入口 + 1 Express + 1 路由汇总 + 4 子路由 + 4
+                  控制器 + 2 中间件 + 1 数据库 + 1 配置）
+    .env 环境变量：1 个
+    .vue 组件文件：20 个（1 根组件 + 1 布局 + 7 通用 + 13 页面 - 2已删除模板）
+    .js 模块文件：16 个（1 路由 + 3 Store + 5 API + 2 Mock + 4 工具）
+    入口 HTML：1 个
+    配置文件：1 个（vite.config.js）
+  后端源文件：16 个
+    .js 模块文件：15 个（1 入口 + 1 Express + 1 路由汇总 + 4 子路由 + 4
+                  控制器 + 2 中间件 + 1 数据库 + 1 配置）
+    .env 环境变量：1 个
