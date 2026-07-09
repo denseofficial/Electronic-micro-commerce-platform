@@ -24,8 +24,10 @@ function handleSubmit() {
       :placeholder="placeholder"
       @keyup.enter="handleSubmit"
     />
-    <button class="search-bar__btn" @click="handleSubmit">
-      🔍
+    <button class="search-bar__btn" @click="handleSubmit" aria-label="搜索">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
+      </svg>
     </button>
   </div>
 </template>
@@ -61,6 +63,9 @@ function handleSubmit() {
   padding: 8px 14px;
   cursor: pointer;
   font-size: 16px;
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
   transition: transform var(--dur-1) var(--ease-out);
 }
 

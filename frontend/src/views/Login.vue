@@ -35,9 +35,23 @@ const { formRef, loading, handleSubmit } = useForm(async () => {
 
 <template>
   <div class="auth-page">
-    <div class="auth-card">
-      <h1>登录</h1>
-      <p class="subtitle">欢迎回到电子微商城</p>
+    <main class="auth-card glass glass--strong">
+      <!-- 品牌标识 -->
+      <header class="brand">
+        <span class="brand__logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+            <path d="M3 6h18" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+        </span>
+        <span class="brand__name">电子微商城</span>
+      </header>
+
+      <div class="auth-head">
+        <h1>欢迎登录</h1>
+        <p class="subtitle">登录账户，开启你的数码生活</p>
+      </div>
 
       <!-- Element Plus 表单组件 -->
       <el-form
@@ -84,28 +98,182 @@ const { formRef, loading, handleSubmit } = useForm(async () => {
         还没有账号？<router-link to="/register">立即注册</router-link>
       </p>
       <p class="hint">提示：测试账号 admin / admin123</p>
-    </div>
+    </main>
   </div>
 </template>
 
 <style scoped>
 .auth-page {
-  display: flex; justify-content: center; align-items: center;
-  min-height: 80vh; padding: 20px;
-  animation: fadeIn 0.4s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  overflow-x: hidden;
+  background:
+    radial-gradient(72% 60% at 14% 8%, rgba(255, 122, 69, 0.1), transparent 60%),
+    radial-gradient(60% 54% at 92% 18%, rgba(124, 77, 255, 0.1), transparent 60%),
+    var(--bg-page);
+  animation: fadeIn var(--dur-3) var(--ease-out);
 }
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+
+/* 装饰性品牌光晕 */
+.auth-page::before,
+.auth-page::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(48px);
+  pointer-events: none;
+  z-index: 0;
 }
+.auth-page::before {
+  width: 420px;
+  height: 420px;
+  top: -140px;
+  right: -110px;
+  background: var(--brand-gradient-soft);
+}
+.auth-page::after {
+  width: 360px;
+  height: 360px;
+  bottom: -140px;
+  left: -120px;
+  background: radial-gradient(circle, rgba(124, 77, 255, 0.12), transparent 70%);
+}
+
 .auth-card {
-  width: 100%; max-width: 420px;
-  background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px;
-  box-shadow: var(--shadow-md);
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  padding: 40px 36px;
+  border-radius: var(--radius-xl);
+  text-align: center;
 }
-h1 { font-size: 28px; font-weight: 700; color: var(--text-primary); margin: 0; text-align: center; }
-.subtitle { text-align: center; color: var(--text-muted); font-size: 14px; margin: 8px 0 24px; }
-.switch-link { text-align: center; font-size: 14px; color: var(--text-muted); margin-top: 20px; }
-.switch-link a { color: var(--primary); text-decoration: none; font-weight: 500; }
-.hint { text-align: center; font-size: 12px; color: var(--text-placeholder); margin-top: 12px; }
+
+/* 品牌标识 */
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.brand__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--brand-gradient);
+  box-shadow: var(--shadow-brand);
+  color: #fff;
+}
+.brand__logo svg {
+  width: 30px;
+  height: 30px;
+}
+.brand__name {
+  font-size: var(--text-lg);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+}
+
+.auth-head {
+  margin-bottom: 26px;
+}
+h1 {
+  margin: 0;
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--text-primary);
+}
+.subtitle {
+  margin: 8px 0 0;
+  font-size: var(--text-md);
+  color: var(--text-muted);
+}
+
+/* 表单标签 */
+.auth-card :deep(.el-form-item__label) {
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  padding-bottom: 6px;
+  line-height: 1.4;
+}
+.auth-card :deep(.el-form-item) {
+  margin-bottom: 18px;
+}
+
+/* 输入框磨砂底边 + 聚焦品牌描边（沿用 EP 自身背景，兼容明暗主题） */
+.auth-card :deep(.el-input__wrapper) {
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 1px var(--border) inset;
+  transition: box-shadow var(--dur-1) var(--ease-out);
+}
+.auth-card :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px var(--primary) inset, 0 0 0 3px var(--primary-bg);
+}
+
+/* 提交按钮：品牌渐变签名 CTA */
+.auth-card :deep(.el-button--danger) {
+  background: var(--brand-gradient);
+  border: none;
+  box-shadow: var(--shadow-brand);
+  font-weight: 600;
+  transition: box-shadow var(--dur-1) var(--ease-out),
+    transform var(--dur-1) var(--ease-out);
+}
+.auth-card :deep(.el-button--danger:focus),
+.auth-card :deep(.el-button--danger:hover) {
+  background: var(--brand-gradient);
+  box-shadow: 0 10px 26px rgba(255, 71, 87, 0.32);
+  transform: translateY(-1px);
+}
+.auth-card :deep(.el-button--danger:active) {
+  transform: translateY(0);
+}
+
+.switch-link {
+  margin-top: 22px;
+  font-size: var(--text-md);
+  color: var(--text-secondary);
+}
+.switch-link a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--dur-1) var(--ease-out);
+}
+.switch-link a:hover {
+  color: var(--primary-hover);
+}
+.hint {
+  margin-top: 14px;
+  font-size: var(--text-xs);
+  color: var(--text-placeholder);
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 32px 22px;
+    border-radius: var(--radius-lg);
+  }
+  h1 {
+    font-size: var(--text-xl);
+  }
+  .brand__logo {
+    width: 50px;
+    height: 50px;
+  }
+  .brand__logo svg {
+    width: 27px;
+    height: 27px;
+  }
+}
 </style>

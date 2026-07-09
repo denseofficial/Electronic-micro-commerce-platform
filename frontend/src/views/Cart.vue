@@ -27,7 +27,7 @@ function goProduct(id) {
 
 <template>
   <div class="cart-page">
-    <h1 class="page-title">🛒 我的购物车</h1>
+    <h1 class="page-title">我的购物车</h1>
 
     <div v-if="cartStore.items.length" class="cart-content">
       <div class="cart-list">
@@ -71,12 +71,16 @@ function goProduct(id) {
             <button :disabled="item.quantity >= item.stock" @click="cartStore.updateQuantity(item.productId, item.quantity + 1)">+</button>
           </div>
           <span class="item-subtotal">{{ formatPrice(item.price * item.quantity) }}</span>
-          <button class="del-btn" @click="cartStore.removeItem(item.productId)">🗑</button>
+          <button class="del-btn" @click="cartStore.removeItem(item.productId)" aria-label="删除">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6" /><path d="M10 11v6M14 11v6" />
+            </svg>
+          </button>
         </div>
       </div>
 
       <!-- 汇总栏 -->
-      <div class="cart-summary">
+      <div class="cart-summary" v-reveal>
         <div class="summary-row">
           <span>已选商品 <strong>{{ cartStore.checkedCount }}</strong> 件</span>
           <span class="summary-total">
@@ -90,9 +94,15 @@ function goProduct(id) {
     </div>
 
     <div v-else class="empty-cart">
-      <p>🛒</p>
-      <h3>购物车为空</h3>
-      <button @click="router.push({ name: 'ProductList' })">去逛逛</button>
+      <span class="empty-cart__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+      </span>
+      <h3>购物车还是空的</h3>
+      <p class="empty-cart__hint">挑些好物放进来吧～</p>
+      <button class="btn btn--primary" @click="router.push({ name: 'ProductList' })">去逛逛</button>
     </div>
   </div>
 </template>
@@ -110,8 +120,9 @@ function goProduct(id) {
 /* Toolbar */
 .cart-toolbar {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 18px; background: var(--bg-white); border: 1px solid var(--border);
+  padding: 14px 18px; background: var(--glass-bg); border: 1px solid var(--glass-border);
   border-radius: var(--radius-md); margin-bottom: 16px;
+  -webkit-backdrop-filter: blur(var(--glass-blur)); backdrop-filter: blur(var(--glass-blur));
 }
 .check-all { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; color: var(--text-primary); }
 .clear-btn { background: none; border: none; color: var(--primary); cursor: pointer; font-size: 14px; transition: opacity var(--dur-1) var(--ease-out); }
@@ -122,8 +133,9 @@ function goProduct(id) {
 
 .cart-item {
   display: flex; align-items: center; gap: 14px;
-  padding: 16px; background: var(--bg-white); border: 1px solid var(--border);
+  padding: 16px; background: var(--glass-bg); border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
+  -webkit-backdrop-filter: blur(var(--glass-blur)); backdrop-filter: blur(var(--glass-blur));
   transition: border-color var(--dur-1) var(--ease-out), box-shadow var(--dur-1) var(--ease-out);
 }
 .cart-item:hover { border-color: var(--primary-light); box-shadow: var(--shadow-sm); }
@@ -157,8 +169,9 @@ function goProduct(id) {
 
 /* Summary */
 .cart-summary {
-  background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px;
+  background: var(--glass-bg-strong); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 20px;
   position: sticky; top: 80px;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%); backdrop-filter: blur(var(--glass-blur)) saturate(150%);
 }
 .summary-row {
   display: flex; justify-content: space-between;
@@ -174,15 +187,28 @@ function goProduct(id) {
 .checkout-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-brand); }
 
 /* Empty */
-.empty-cart { text-align: center; padding: 80px 20px; }
-.empty-cart p { font-size: 64px; margin: 0; }
-.empty-cart h3 { font-size: 18px; color: var(--text-secondary); margin: 16px 0; }
-.empty-cart button {
-  padding: 10px 32px; background: var(--primary); color: #fff;
-  border: none; border-radius: var(--radius-md); font-size: 15px; cursor: pointer;
-  transition: background-color var(--dur-1) var(--ease-out);
+.empty-cart {
+  text-align: center;
+  padding: 72px 20px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
 }
-.empty-cart button:hover { background: var(--primary-hover); }
+.empty-cart__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--primary-bg);
+  color: var(--primary);
+  margin-bottom: 16px;
+}
+.empty-cart h3 { font-size: 18px; color: var(--text-primary); margin: 0 0 6px; }
+.empty-cart__hint { font-size: 14px; color: var(--text-muted); margin: 0 0 20px; }
 
 @media (max-width: 768px) {
   .cart-content { grid-template-columns: 1fr; }

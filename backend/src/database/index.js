@@ -175,7 +175,7 @@ export function initSeedData() {
         "name": "《深入理解计算机系统》第3版",
         "price": 89,
         "quantity": 1,
-        "image": "src/assets/images/CSBook.jpg"
+        "image": "/images/csbook.jpg"
       }
     ],
     "address": {

@@ -65,6 +65,30 @@ const routes = [
         component: () => import('../views/UserCenter.vue'),
         meta: { title: '个人中心', auth: true },
       },
+      {
+        path: 'membership',
+        name: 'Membership',
+        component: () => import('../views/Membership.vue'),
+        meta: { title: '会员中心', auth: true },
+      },
+      {
+        path: 'brand',
+        name: 'BrandStory',
+        component: () => import('../views/BrandStory.vue'),
+        meta: { title: '品牌故事' },
+      },
+      {
+        path: 'flash-sale',
+        name: 'FlashSale',
+        component: () => import('../views/FlashSale.vue'),
+        meta: { title: '限时秒杀' },
+      },
+      {
+        path: 'news',
+        name: 'News',
+        component: () => import('../views/News.vue'),
+        meta: { title: '玩机资讯' },
+      },
     ],
   },
   {

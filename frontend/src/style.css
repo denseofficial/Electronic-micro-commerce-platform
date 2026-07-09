@@ -11,6 +11,15 @@
   --primary-hover: #f5364a;
   --primary-active: #e63946;
 
+  /* 辅助强调色（电光紫）— 仅用于签名动作点缀，少量使用 */
+  --accent: #7c4dff;
+  --accent-light: #a78bfa;
+  --accent-bg: #f1ecff;
+
+  /* 品牌渐变（签名 CTA / 强调条）— 收束使用 */
+  --brand-gradient: linear-gradient(135deg, #ff4757 0%, #ff7a45 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(255, 71, 87, 0.12), rgba(255, 122, 69, 0.12));
+
   /* 墨色中性体系（替代死灰 #333/#666/#999） */
   --ink: #1a1a1a;
   --text-primary: #1f1f1f;
@@ -26,6 +35,12 @@
   /* 发丝边框 */
   --border: #ededed;
   --border-light: #f5f5f5;
+
+  /* 玻璃质感（高级感）— 半透明磨砂表面 + 顶部高光 */
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-bg-strong: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-blur: 14px;
 
   /* 语义色 */
   --success: #2ed573;
@@ -74,6 +89,77 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ---------- 暗色主题（[data-theme="dark"]） ---------- */
+/* 同名变量覆盖：暗色下复用亮色令牌名、仅改取值；EP 主键由下方 --el-* 重新品牌化 */
+[data-theme='dark'] {
+  /* 表面 */
+  --bg-page: #0f1115;
+  --bg-white: #171a21;
+  --surface-2: #1f2330;
+
+  /* 文字 */
+  --text-primary: #f2f4f8;
+  --text-secondary: #b8bec9;
+  --text-muted: #7c828e;
+  --text-placeholder: #5c626d;
+
+  /* 边框 */
+  --border: #262b35;
+  --border-light: #1f242d;
+
+  /* 玻璃质感（暗色）— 深底磨砂 + 浅色描边 */
+  --glass-bg: rgba(23, 26, 33, 0.55);
+  --glass-bg-strong: rgba(23, 26, 33, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: 14px;
+
+  /* 品牌主色在暗底保留，浅底改为半透明 */
+  --primary-bg: rgba(255, 71, 87, 0.14);
+  --accent-bg: rgba(124, 77, 255, 0.16);
+
+  /* 阴影转暗 */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 1px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --shadow-brand: 0 6px 20px rgba(255, 71, 87, 0.35);
+
+  /* 页面底色/文字（覆盖 :root 直接写入的值） */
+  background: var(--bg-page);
+  color: var(--text-primary);
+
+  /* 重新品牌化 Element Plus 主键，使暗色组件跟随品牌红 */
+  --el-color-primary: #ff4757;
+  --el-color-primary-light-3: #ff7d8e;
+  --el-color-primary-light-5: #ffaab4;
+  --el-color-primary-light-7: #ffd0d6;
+  --el-color-primary-light-8: #ffe0e4;
+  --el-color-primary-light-9: #fff0f2;
+  --el-color-primary-dark-2: #e63946;
+
+  /* EP 暗色下的文字/边框/背景与项目令牌对齐 */
+  --el-text-color-primary: #f2f4f8;
+  --el-text-color-regular: #b8bec9;
+  --el-text-color-secondary: #7c828e;
+  --el-text-color-placeholder: #5c626d;
+  --el-border-color: #262b35;
+  --el-border-color-light: #1f242d;
+  --el-border-color-lighter: #1a1e26;
+  --el-bg-color: #171a21;
+  --el-bg-color-page: #0f1115;
+  --el-bg-color-overlay: #1f2330;
+  --el-fill-color: #1f2330;
+  --el-fill-color-light: #23272f;
+  --el-fill-color-lighter: #1a1e26;
+  --el-fill-color-blank: #171a21;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #2a2f38;
+}
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #3a4150;
+}
+
 /* ---------- 全局重置 ---------- */
 *,
 *::before,
@@ -84,6 +170,20 @@
 body {
   margin: 0;
   padding: 0;
+  position: relative;
+}
+
+/* 环境光：为玻璃磨砂表面提供可模糊的微妙色彩，营造高级层次感 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 48% at 12% 0%, rgba(255, 122, 69, 0.1), transparent 60%),
+    radial-gradient(50% 46% at 100% 8%, rgba(124, 77, 255, 0.09), transparent 60%),
+    radial-gradient(46% 40% at 48% 100%, rgba(255, 71, 87, 0.08), transparent 62%);
 }
 
 a {
@@ -129,6 +229,140 @@ input {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #aaa;
+}
+
+/* ---------- 基础组件类（全局复用） ---------- */
+/* 按钮：品牌渐变主 CTA、幽灵、块级 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 22px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
+  font-weight: 600;
+  font-family: inherit;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: transform var(--dur-1) var(--ease-out),
+    box-shadow var(--dur-1) var(--ease-out),
+    background-color var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out), opacity var(--dur-1);
+  white-space: nowrap;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn--primary {
+  background: var(--brand-gradient);
+  color: #fff;
+  box-shadow: var(--shadow-brand);
+}
+.btn--primary:hover {
+  box-shadow: 0 10px 26px rgba(255, 71, 87, 0.32);
+  transform: translateY(-1px);
+}
+.btn--ghost {
+  background: var(--bg-white);
+  color: var(--primary);
+  border-color: var(--border);
+}
+.btn--ghost:hover {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+}
+.btn--block {
+  width: 100%;
+}
+.btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* 区块：标题 + 右侧操作，统一页面楼层节奏 */
+.section {
+  margin-bottom: 40px;
+}
+.section__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.section__title {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  position: relative;
+  padding-left: 14px;
+}
+.section__title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 22px;
+  border-radius: 3px;
+  background: var(--brand-gradient);
+}
+.section__more {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--dur-1) var(--ease-out);
+}
+.section__more:hover {
+  color: var(--primary);
+}
+
+/* 角标 / 标签 */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+/* 统一状态：空 / 加载 / 错误 */
+.state {
+  text-align: center;
+  padding: 64px 20px;
+  color: var(--text-muted);
+}
+.state__icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+.state__text {
+  font-size: var(--text-md);
+}
+.state--loading .state__text {
+  color: var(--text-secondary);
+}
+
+/* 玻璃质感（高级感）— 磨砂半透明 + 顶部高光 + 发丝描边 */
+.glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-md),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+.glass--strong {
+  background: var(--glass-bg-strong);
 }
 
 /* ---------- 动画 ---------- */

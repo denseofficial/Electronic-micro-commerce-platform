@@ -90,7 +90,7 @@ function onPageChange(p) {
     <div v-if="productStore.loading" class="loading">加载中...</div>
 
     <!-- 商品列表 -->
-    <div v-else-if="productStore.list.length" class="product-grid">
+    <div v-else-if="productStore.list.length" class="product-grid" v-reveal>
       <ProductCard
         v-for="product in productStore.list"
         :key="product.id"
@@ -116,7 +116,13 @@ function onPageChange(p) {
 }
 .page-title { font-size: var(--text-2xl); font-weight: 700; color: var(--text-primary); margin: 0 0 24px; }
 
-.filter-bar { background: var(--bg-white); border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 24px; border: 1px solid var(--border); }
+.filter-bar {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 24px; border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
 .filter-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
 .filter-row:last-child { margin-bottom: 0; }
 .filter-label { font-size: 14px; color: var(--text-secondary); font-weight: 500; min-width: 50px; }
@@ -129,7 +135,14 @@ function onPageChange(p) {
 .filter-row button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
 .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-.loading, .empty { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 15px; }
+.loading, .empty {
+  text-align: center; padding: 72px 20px; color: var(--text-muted); font-size: 15px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+}
 
 @media (max-width: 1024px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }

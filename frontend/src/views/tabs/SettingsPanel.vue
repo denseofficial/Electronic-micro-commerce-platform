@@ -21,7 +21,11 @@ function applyColor(color) {
 
 <template>
   <div class="settings-panel">
-    <h3>主题设置</h3>
+    <header class="settings-head">
+      <h3 class="settings-title">主题设置</h3>
+      <p class="settings-sub">为你的商城挑选专属品牌色</p>
+    </header>
+
     <div class="color-grid">
       <button
         v-for="c in presetColors"
@@ -29,14 +33,27 @@ function applyColor(color) {
         class="color-btn"
         :style="{ background: c }"
         :class="{ active: c === themeColor }"
+        :aria-label="`主题色 ${c}`"
         @click="applyColor(c)"
       >
-        <span v-if="c === themeColor">✓</span>
+        <svg
+          v-if="c === themeColor"
+          class="check"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
       </button>
     </div>
+
     <p class="hint">
       当前主题色：
-      <span :style="{ color: themeColor }">{{ themeColor }}</span>
+      <span :style="{ color: themeColor }" class="hint__value">{{ themeColor }}</span>
     </p>
     <p class="note">
       主题色通过 provide/inject 跨级传递，Header/Footer 同步更新
@@ -45,20 +62,67 @@ function applyColor(color) {
 </template>
 
 <style scoped>
-.settings-panel { animation: fadeIn 0.3s ease; }
+.settings-panel {
+  animation: fadeIn 0.3s var(--ease-out);
+}
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-h3 { font-size: 16px; color: var(--text-primary); margin: 0 0 16px; }
-.color-grid { display: flex; gap: 12px; margin-bottom: 16px; }
-.color-btn {
-  width: 44px; height: 44px; border-radius: 50%; border: 3px solid transparent;
-  cursor: pointer; color: #fff; font-size: 18px;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
+
+.settings-head { margin-bottom: 18px; }
+.settings-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px;
 }
-.color-btn.active { border-color: var(--ink); transform: scale(1.15); box-shadow: 0 2px 8px var(--shadow-md); }
-.hint { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
-.note { font-size: 12px; color: var(--text-muted); }
+.settings-sub {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ---------- 主题色色板 ---------- */
+.color-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.color-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--dur-1) var(--ease-out),
+    box-shadow var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out);
+}
+.color-btn:hover { transform: scale(1.08); }
+.color-btn.active {
+  border-color: var(--bg-white);
+  transform: scale(1.14);
+  box-shadow: var(--shadow-md);
+}
+.check { width: 22px; height: 22px; }
+
+.hint {
+  font-size: var(--text-md);
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+.hint__value { font-weight: 700; }
+
+.note {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.6;
+}
 </style>

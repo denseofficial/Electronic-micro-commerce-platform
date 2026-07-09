@@ -69,7 +69,7 @@ async function submitOrder() {
     <h1 class="page-title">确认订单</h1>
 
     <!-- 收货地址 -->
-    <section class="section">
+    <section class="section" v-reveal>
       <h3>收货地址</h3>
       <div class="address-card">
         <p><strong>{{ address.name }}</strong> {{ address.mobile }}</p>
@@ -80,7 +80,7 @@ async function submitOrder() {
     </section>
 
     <!-- 商品清单 -->
-    <section class="section">
+    <section class="section" v-reveal>
       <h3>商品清单</h3>
       <div class="item-list">
         <div v-for="item in cartStore.checkedItems" :key="item.productId" class="item">
@@ -95,7 +95,7 @@ async function submitOrder() {
     </section>
 
     <!-- 订单合计 -->
-    <section class="section summary">
+    <section class="section summary" v-reveal>
       <div class="summary-row">
         <span>商品合计</span>
         <span class="price">{{ formatPrice(cartStore.totalPrice) }}</span>
@@ -125,7 +125,8 @@ async function submitOrder() {
 .page-title { font-size: var(--text-2xl); font-weight: 700; color: var(--text-primary); margin: 0 0 20px; }
 
 .section {
-  background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px;
+  -webkit-backdrop-filter: blur(var(--glass-blur)); backdrop-filter: blur(var(--glass-blur));
 }
 .section h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); margin: 0 0 12px; }
 
