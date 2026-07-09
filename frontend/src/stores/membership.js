@@ -39,14 +39,18 @@ export const useMembershipStore = defineStore('membership', () => {
   const history = ref(HISTORY_DEFAULT)
   const claimed = ref({})
 
-  // 载入本地持久化数据
+  // 载入本地持久化数据（兼容旧版 claimed 数组格式）
   try {
     const raw = localStorage.getItem(LS_KEY)
     if (raw) {
       const saved = JSON.parse(raw)
       if (typeof saved.points === 'number') points.value = saved.points
       if (Array.isArray(saved.history)) history.value = saved.history
-      if (saved.claimed) claimed.value = saved.claimed
+      if (saved.claimed) {
+        claimed.value = Array.isArray(saved.claimed)
+          ? saved.claimed.reduce((m, k) => ({ ...m, [k]: true }), {})
+          : saved.claimed
+      }
     }
   } catch {
     /* 损坏的本地数据忽略 */
