@@ -120,6 +120,14 @@ export function initSeedData() {
   const products = collection('products')
   if (products.count() === 0) {
     seedProducts.forEach((p) => products.insert(p))
+  } else {
+    // 合种新种子字段（如限时秒杀价 flashPrice）：保留运行时已有数据，仅补全新种子字段
+    const rows = products.all()
+    const merged = rows.map((row) => {
+      const seed = seedProducts.find((s) => s.id === row.id)
+      return seed ? { ...seed, ...row } : row
+    })
+    products.replaceAll(merged)
   }
   const categories = collection('categories')
   if (categories.count() === 0) {

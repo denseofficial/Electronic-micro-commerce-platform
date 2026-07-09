@@ -37,6 +37,7 @@ async function submitOrder() {
         price: i.price,
         quantity: i.quantity,
         image: i.image,
+        isFlash: i.isFlash,
       })),
       address: {
         name: address.value.name,

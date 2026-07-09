@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useProductStore } from '../stores/product'
 import { useCartStore } from '../stores/cart'
 import { useAuthStore } from '../stores/auth'
+import { useMembershipStore } from '../stores/membership'
 import { formatPrice, formatDate } from '../utils/format'
 import { getReviews, createReview } from '../api/reviews'
 import StarRating from '../components/common/StarRating.vue'
@@ -15,6 +16,7 @@ const router = useRouter()
 const productStore = useProductStore()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
+const membership = useMembershipStore()
 
 const product = computed(() => productStore.currentProduct)
 const currentImage = ref(0)
@@ -56,6 +58,8 @@ async function submitReview() {
     })
     ElMessage.success('评价成功')
     reviewForm.value = { rating: 5, content: '' }
+    // 评价订单任务完成：发放积分（仅一次）
+    membership.award('review', '评价订单')
     await loadReviews(route.params.id)
     if (productStore.currentProduct) {
       productStore.currentProduct.rating = res.data.average
@@ -86,6 +90,22 @@ async function addToCart() {
 function buyNow() {
   addToCart()
   router.push({ name: 'Cart' })
+}
+
+async function shareProduct() {
+  const url = `${location.origin}/#/product/${route.params.id}`
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: product.value?.name || '好物推荐', url })
+    } else {
+      await navigator.clipboard.writeText(url)
+      ElMessage.success('商品链接已复制，去分享给好友吧')
+    }
+    // 分享成功：发放积分（仅一次）
+    membership.award('share', '分享商品')
+  } catch {
+    /* 用户取消分享，不发放积分 */
+  }
 }
 </script>
 
@@ -165,6 +185,12 @@ function buyNow() {
           </button>
           <button class="btn btn--primary actions__buy" @click="buyNow">
             ⚡ 立即购买
+          </button>
+          <button class="btn btn--ghost actions__share" @click="shareProduct" aria-label="分享商品">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle>
+              <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"></path>
+            </svg>
           </button>
         </div>
 
@@ -400,6 +426,13 @@ function buyNow() {
 .actions { display: flex; gap: 12px; }
 .actions__cart { flex: 1; }
 .actions__buy { flex: 1; }
+.actions__share {
+  flex: 0 0 auto;
+  width: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .service {
   list-style: none;

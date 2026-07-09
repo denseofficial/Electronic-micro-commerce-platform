@@ -1,10 +1,12 @@
 <script setup>
 import { ref, inject, reactive } from 'vue'
 import { useAuthStore } from '../../stores/auth'
+import { useMembershipStore } from '../../stores/membership'
 import { updateUserProfile } from '../../api/user'
 import { ElMessage } from 'element-plus'
 
 const authStore = useAuthStore()
+const membership = useMembershipStore()
 const siteConfig = inject('siteConfig')
 
 // ============ 编辑模式 ============
@@ -45,6 +47,8 @@ async function handleSave() {
     authStore.updateUser(res.data)
     editing.value = false
     ElMessage.success('个人信息更新成功！')
+    // 完善资料任务完成：发放积分（仅一次）
+    membership.award('profile', '完善个人资料')
   } catch (e) {
     ElMessage.error('更新失败：' + (e.message || '未知错误'))
   } finally {

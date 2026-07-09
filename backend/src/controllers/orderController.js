@@ -27,21 +27,25 @@ export function createOrder(req, res, next) {
       if (!product) {
         return res.status(400).json({ code: 400, message: `商品不存在：${it.productId}` })
       }
-      // 价格核对：客户端传入价与目录价偏差超过 0.01 即视为异常（防改价下单）
-      if (Math.abs(Number(it.price) - product.price) > 0.01) {
+      // 允许成交价：普通目录价，或限时秒杀价（仅当客户端声明 isFlash 且商品已配置 flashPrice）
+      const isFlash = !!it.isFlash && typeof product.flashPrice === 'number'
+      const allowedPrice = isFlash ? product.flashPrice : product.price
+      // 价格核对：客户端传入价与允许成交价偏差超过 0.01 即视为异常（防改价下单）
+      if (Math.abs(Number(it.price) - allowedPrice) > 0.01) {
         return res.status(400).json({ code: 400, message: `商品价格已变动，请刷新后重试：${product.name}` })
       }
       if (product.stock < Number(it.quantity)) {
         return res.status(400).json({ code: 400, message: `库存不足：${product.name}（剩余 ${product.stock}）` })
       }
-      serverTotal += product.price * Number(it.quantity)
+      serverTotal += allowedPrice * Number(it.quantity)
       verifiedItems.push({
         productId: product.id,
         name: product.name,
-        price: product.price,
+        price: allowedPrice,
         quantity: Number(it.quantity),
         image: product.image,
         specs: it.specs || '',
+        isFlash,
       })
     }
 

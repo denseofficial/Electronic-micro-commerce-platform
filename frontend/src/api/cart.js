@@ -41,6 +41,7 @@ export function addToCart({ product, quantity = 1, specs = '' }) {
       specs,
       stock: product.stock,
       checked: true,
+      isFlash: product.isFlash ?? false,
     })
   }
   saveLocalCart(cart)

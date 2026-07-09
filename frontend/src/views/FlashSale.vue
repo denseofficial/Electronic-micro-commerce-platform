@@ -107,6 +107,7 @@ function buyNow(item) {
     image: item.image,
     price: item.flashPrice,
     quantity: 1,
+    isFlash: true, // 标记秒杀，结算时后端按秒杀价核价
   }
   cartStore.addToCart(payload)
   ElMessage.success(`已将「${item.name}」加入购物车`)
