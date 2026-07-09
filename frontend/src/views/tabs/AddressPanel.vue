@@ -142,7 +142,15 @@ async function handleDelete(addr) {
   <div class="address-panel">
     <!-- 操作栏 -->
     <div class="toolbar">
-      <el-button type="primary" size="small" @click="openAdd">+ 新增地址</el-button>
+      <el-button type="primary" size="small" class="add-btn" @click="openAdd">
+        <span class="add-btn__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </span>
+        新增地址
+      </el-button>
     </div>
 
     <!-- 加载中 -->
@@ -150,11 +158,11 @@ async function handleDelete(addr) {
 
     <!-- 地址列表 -->
     <div v-else-if="addresses.length" class="address-list">
-      <div v-for="addr in addresses" :key="addr.id" class="address-card">
+      <div v-for="addr in addresses" :key="addr.id" class="address-card glass">
         <div class="addr-header">
-          <strong>{{ addr.name }}</strong>
+          <strong class="addr-name">{{ addr.name }}</strong>
           <span class="phone">{{ addr.mobile }}</span>
-          <el-tag v-if="addr.isDefault" size="small" type="danger">默认</el-tag>
+          <el-tag v-if="addr.isDefault" size="small" type="danger" effect="light">默认</el-tag>
         </div>
         <p class="addr-detail">
           {{ addr.province }}{{ addr.city }}{{ addr.district }} {{ addr.detail }}
@@ -167,10 +175,13 @@ async function handleDelete(addr) {
     </div>
 
     <!-- 空状态 -->
-    <div v-else class="empty">暂无收货地址，点击上方按钮添加</div>
+    <div v-else class="empty glass">
+      <p class="empty__text">暂无收货地址</p>
+      <p class="empty__hint">点击上方「新增地址」开始添加</p>
+    </div>
 
     <!-- ============ 新增/编辑对话框 ============ -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="90%" :style="{ maxWidth: '480px' }">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="90%" :style="{ maxWidth: '480px' }" class="addr-dialog">
       <el-form label-position="top">
         <el-form-item label="收货人">
           <el-input v-model="form.name" placeholder="请输入收货人姓名" />
@@ -213,27 +224,112 @@ async function handleDelete(addr) {
 </template>
 
 <style scoped>
-.address-panel { animation: fadeIn 0.3s ease; }
+.address-panel {
+  animation: fadeIn 0.3s var(--ease-out);
+}
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.toolbar { margin-bottom: 12px; }
+.toolbar { margin-bottom: 14px; }
 
-.loading-text { text-align: center; padding: 20px; color: #999; font-size: 14px; }
+/* 新增地址按钮（品牌渐变 CTA） */
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.add-btn__icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+}
+.add-btn__icon svg { width: 16px; height: 16px; }
+.address-panel :deep(.el-button--primary) {
+  background: var(--brand-gradient);
+  border: none;
+  box-shadow: var(--shadow-brand);
+}
+.address-panel :deep(.el-button--primary:hover) {
+  background: var(--brand-gradient);
+  filter: brightness(1.04);
+  box-shadow: 0 10px 26px rgba(255, 71, 87, 0.32);
+}
 
+.loading-text {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-muted);
+  font-size: var(--text-md);
+}
+
+/* ---------- 地址卡片（玻璃 + 悬浮抬升） ---------- */
 .address-card {
-  background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px;
   position: relative;
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 14px;
+  transition: transform var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out);
 }
-.addr-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-.phone { color: #999; font-size: 13px; }
-.addr-detail { font-size: 13px; color: #666; margin: 0 0 8px; }
-
+.address-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border-color: var(--primary-light);
+}
+.addr-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.addr-name { font-size: var(--text-md); color: var(--text-primary); }
+.phone { color: var(--text-muted); font-size: var(--text-sm); }
+.addr-detail {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
 .addr-actions {
-  display: flex; gap: 4px; border-top: 1px solid #f5f5f5; padding-top: 8px;
+  display: flex;
+  gap: 4px;
+  border-top: 1px solid var(--border-light);
+  padding-top: 10px;
 }
 
-.empty { text-align: center; padding: 40px 20px; color: #999; font-size: 14px; }
+/* ---------- 空状态 ---------- */
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  border-radius: var(--radius-lg);
+}
+.empty__text {
+  margin: 0 0 6px;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.empty__hint {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ---------- 对话框细化 ---------- */
+.address-panel :deep(.addr-dialog .el-dialog) {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+.address-panel :deep(.addr-dialog .el-dialog__header) {
+  padding: 22px 22px 0;
+}
+.address-panel :deep(.addr-dialog .el-dialog__body) {
+  padding: 18px 22px;
+}
+.address-panel :deep(.addr-dialog .el-dialog__footer) {
+  padding: 0 22px 22px;
+}
 </style>

@@ -6,6 +6,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { categories as seedCategories, products as seedProducts } from './seed/catalog.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = path.join(__dirname, '..', '..', 'data')
@@ -102,6 +103,12 @@ export function collection(name) {
     all() {
       return readCollection(name)
     },
+
+    /** 整体替换集合（用于需要原子更新多行的场景，如扣减库存） */
+    replaceAll(rows) {
+      writeCollection(name, rows)
+      return rows
+    },
   }
 }
 
@@ -109,6 +116,24 @@ export function collection(name) {
  * 初始化种子数据
  */
 export function initSeedData() {
+  // 商品目录与分类（后端事实源，仅首次初始化）
+  const products = collection('products')
+  if (products.count() === 0) {
+    seedProducts.forEach((p) => products.insert(p))
+  } else {
+    // 合种新种子字段（如限时秒杀价 flashPrice）：保留运行时已有数据，仅补全新种子字段
+    const rows = products.all()
+    const merged = rows.map((row) => {
+      const seed = seedProducts.find((s) => s.id === row.id)
+      return seed ? { ...seed, ...row } : row
+    })
+    products.replaceAll(merged)
+  }
+  const categories = collection('categories')
+  if (categories.count() === 0) {
+    seedCategories.forEach((c) => categories.insert(c))
+  }
+
   const users = collection('users')
   if (users.count() === 0) {
     const bcryptjs = __require_bcrypt()
@@ -158,7 +183,7 @@ export function initSeedData() {
         "name": "《深入理解计算机系统》第3版",
         "price": 89,
         "quantity": 1,
-        "image": "src/assets/images/CSBook.jpg"
+        "image": "/images/csbook.jpg"
       }
     ],
     "address": {

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductStore } from '../stores/product'
 import ProductCard from '../components/common/ProductCard.vue'
@@ -10,51 +10,19 @@ const productStore = useProductStore()
 
 const keyword = ref(route.query.q || '')
 const page = ref(1)
-const pageSize = 8
-let searchTimer = null
-
-const hasKeyword = computed(() => keyword.value.trim().length > 0)
-const totalPages = computed(() => Math.ceil(productStore.total / pageSize))
-const resultTitle = computed(() => {
-  if (!hasKeyword.value) return '请输入关键词进行搜索'
-  return `搜索结果：${keyword.value}`
-})
-const resultSummary = computed(() => {
-  if (!hasKeyword.value) return '可以在顶部搜索框输入商品名称或描述关键词'
-  return `共找到 ${productStore.total} 件相关商品，当前第 ${page.value} 页`
-})
 
 async function loadData() {
-  if (hasKeyword.value) {
-    await productStore.fetchProducts({ keyword: keyword.value, page: page.value, pageSize })
-  } else {
-    productStore.list = []
-    productStore.total = 0
+  if (keyword.value) {
+    await productStore.fetchProducts({ keyword: keyword.value, page: page.value, pageSize: 8 })
   }
 }
 
-function scheduleSearch() {
-  if (searchTimer) window.clearTimeout(searchTimer)
-  searchTimer = window.setTimeout(() => {
-    loadData()
-  }, 300)
-}
+onMounted(loadData)
 
-watch(
-  () => route.query.q,
-  (val) => {
-    keyword.value = val || ''
-    page.value = 1
-    scheduleSearch()
-  },
-  { immediate: true },
-)
-
-onBeforeUnmount(() => {
-  if (searchTimer) {
-    window.clearTimeout(searchTimer)
-    searchTimer = null
-  }
+watch(() => route.query.q, (val) => {
+  keyword.value = val || ''
+  page.value = 1
+  loadData()
 })
 
 function onPageChange(p) {
@@ -66,21 +34,36 @@ function onPageChange(p) {
 
 <template>
   <div class="search-page">
-    <h1 class="page-title">{{ resultTitle }}</h1>
-    <p class="result-summary">{{ resultSummary }}</p>
+    <h1 class="page-title">
+      搜索结果
+      <span v-if="keyword" class="page-title__kw">：{{ keyword }}</span>
+    </h1>
 
-    <div v-if="productStore.loading" class="loading">搜索中...</div>
+    <div v-if="productStore.loading" class="state state--loading">
+      <span class="state__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M21 21l-4.3-4.3" /><circle cx="11" cy="11" r="7" />
+        </svg>
+      </span>
+      <p class="state__text">搜索中...</p>
+    </div>
     <div v-else-if="productStore.list.length" class="product-grid">
       <ProductCard v-for="p in productStore.list" :key="p.id" :product="p" />
     </div>
     <div v-else class="empty">
-      <p>🔍</p>
-      <p>未找到与「{{ keyword }}」相关的商品</p>
+      <span class="empty__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
+        </svg>
+      </span>
+      <p class="empty__text">未找到与「{{ keyword }}」相关的商品</p>
+      <p class="empty__hint">换个关键词试试吧～</p>
     </div>
 
     <Pagination
+      v-if="!productStore.loading && productStore.list.length"
       :page="page"
-      :total-pages="totalPages"
+      :total-pages="Math.ceil(productStore.total / 8)"
       @change="onPageChange"
     />
   </div>
@@ -92,13 +75,45 @@ function onPageChange(p) {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.page-title { font-size: 22px; font-weight: 700; color: #333; margin: 0 0 20px; }
-.result-summary { color: #666; margin: -10px 0 18px; }
-.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.loading, .empty { text-align: center; padding: 80px 20px; color: #999; font-size: 15px; }
-.empty p { font-size: 48px; margin: 0 0 12px; }
-.empty p:last-child { font-size: 15px; }
+.page-title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 20px;
+}
+.page-title__kw { color: var(--primary); }
+
+.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+.state--loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 80px 20px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+.state__icon { color: var(--primary); animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 72px 20px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+}
+.empty__icon { color: var(--text-placeholder); margin-bottom: 4px; }
+.empty__text { font-size: 15px; color: var(--text-secondary); margin: 0; }
+.empty__hint { font-size: 13px; color: var(--text-muted); margin: 0; }
 
 @media (max-width: 1024px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
 </style>

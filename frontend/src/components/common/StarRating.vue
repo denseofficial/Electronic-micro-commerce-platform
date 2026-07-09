@@ -36,21 +36,21 @@ function starClass(index, rating) {
 }
 
 .star.full {
-  color: #f39c12;
+  color: var(--warning);
 }
 
 .star.half {
-  color: #f39c12;
+  color: var(--warning);
   opacity: 0.5;
 }
 
 .star.empty {
-  color: #ddd;
+  color: var(--border);
 }
 
 .star-rating__num {
   margin-left: 4px;
-  color: #f39c12;
+  color: var(--warning);
   font-weight: 600;
   font-size: 13px;
 }

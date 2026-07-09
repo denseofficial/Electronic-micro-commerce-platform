@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, onMounted, watch, onActivated, onDeactivated } from 'vue'
+import { ref, onMounted, watch, onActivated, onDeactivated } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductStore } from '../stores/product'
 import ProductCard from '../components/common/ProductCard.vue'
@@ -18,64 +18,36 @@ const route = useRoute()
 const router = useRouter()
 const productStore = useProductStore()
 
-const filters = reactive({
-  categoryId: Number(route.query.categoryId) || 0,
-  sort: route.query.sort || '',
-  page: Number(route.query.page) || 1,
-  pageSize: 8,
-})
+const categoryId = ref(Number(route.query.categoryId) || 0)
+const sort = ref(route.query.sort || '')
+const page = ref(Number(route.query.page) || 1)
+const pageSize = 8
 
 const sortOptions = [
   { value: '', label: '默认' },
   { value: 'sales', label: '销量优先' },
-  { value: 'price-asc', label: '价格升序' },
-  { value: 'price-desc', label: '价格降序' },
+  { value: 'price-asc', label: '价格↑' },
+  { value: 'price-desc', label: '价格↓' },
 ]
 
-const totalPages = computed(() => Math.ceil(productStore.total / filters.pageSize))
-const currentCategoryName = computed(() => {
-  if (!filters.categoryId) return '全部分类'
-  return productStore.categories.find((cat) => cat.id === filters.categoryId)?.name || '未知分类'
-})
-const currentSortName = computed(() => {
-  return sortOptions.find((item) => item.value === filters.sort)?.label || '默认'
-})
-const hasFilter = computed(() => Boolean(filters.categoryId || filters.sort))
-const resultSummary = computed(() => {
-  const prefix = hasFilter.value ? `${currentCategoryName.value} / ${currentSortName.value}` : '全部商品'
-  return `${prefix}，共找到 ${productStore.total} 件商品`
-})
-
 async function loadData() {
-  await productStore.fetchProducts({
-    categoryId: filters.categoryId,
-    sort: filters.sort,
-    page: filters.page,
-    pageSize: filters.pageSize,
-  })
+  const params = { page: page.value, pageSize }
+  if (categoryId.value) params.categoryId = categoryId.value
+  if (sort.value) params.sort = sort.value
+  await productStore.fetchProducts(params)
 }
 
 onMounted(() => {
   productStore.fetchCategories()
+  loadData()
 })
 
-watch(
-  () => route.query,
-  (q) => {
-    filters.categoryId = Number(q.categoryId) || 0
-    filters.sort = q.sort || ''
-    filters.page = Number(q.page) || 1
-  },
-  { immediate: true },
-)
-
-watch(
-  filters,
-  () => {
-    loadData()
-  },
-  { deep: true, immediate: true },
-)
+watch(() => route.query, (q) => {
+  categoryId.value = Number(q.categoryId) || 0
+  sort.value = q.sort || ''
+  page.value = Number(q.page) || 1
+  loadData()
+})
 
 function setCategory(id) {
   router.push({ query: { ...route.query, categoryId: id || undefined, page: undefined } })
@@ -91,17 +63,16 @@ function onPageChange(p) {
 
 <template>
   <div class="product-list-page">
-      <h1 class="page-title">全部商品</h1>
-      <p class="result-summary">{{ resultSummary }}</p>
+    <h1 class="page-title">全部商品</h1>
 
     <!-- 分类筛选 -->
     <div class="filter-bar">
       <div class="filter-row">
         <span class="filter-label">分类：</span>
-        <button :class="{ active: filters.categoryId === 0 }" @click="setCategory(0)">全部</button>
+        <button :class="{ active: categoryId === 0 }" @click="setCategory(0)">全部</button>
         <button
           v-for="cat in productStore.categories" :key="cat.id"
-          :class="{ active: filters.categoryId === cat.id }"
+          :class="{ active: categoryId === cat.id }"
           @click="setCategory(cat.id)"
         >{{ cat.name }}</button>
       </div>
@@ -109,7 +80,7 @@ function onPageChange(p) {
         <span class="filter-label">排序：</span>
         <button
           v-for="opt in sortOptions" :key="opt.value"
-          :class="{ active: filters.sort === opt.value }"
+          :class="{ active: sort === opt.value }"
           @click="setSort(opt.value)"
         >{{ opt.label }}</button>
       </div>
@@ -119,7 +90,7 @@ function onPageChange(p) {
     <div v-if="productStore.loading" class="loading">加载中...</div>
 
     <!-- 商品列表 -->
-    <div v-else-if="productStore.list.length" class="product-grid">
+    <div v-else-if="productStore.list.length" class="product-grid" v-reveal>
       <ProductCard
         v-for="product in productStore.list"
         :key="product.id"
@@ -130,8 +101,8 @@ function onPageChange(p) {
 
     <!-- 分页 -->
     <Pagination
-      :page="filters.page"
-      :total-pages="totalPages"
+      :page="page"
+      :total-pages="Math.ceil(productStore.total / pageSize)"
       @change="onPageChange"
     />
   </div>
@@ -143,23 +114,36 @@ function onPageChange(p) {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.page-title { font-size: 24px; font-weight: 700; color: #333; margin: 0 0 20px; }
-.result-summary { color: #666; margin: -10px 0 18px; }
+.page-title { font-size: var(--text-2xl); font-weight: 700; color: var(--text-primary); margin: 0 0 24px; }
 
-.filter-bar { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 20px; border: 1px solid #f0f0f0; }
-.filter-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-.filter-row:last-child { margin-bottom: 0; }
-.filter-label { font-size: 14px; color: #666; font-weight: 500; min-width: 50px; }
-.filter-row button {
-  padding: 6px 14px; border: 1px solid #e0e0e0; border-radius: 16px;
-  background: #fff; font-size: 13px; color: #666; cursor: pointer; transition: all 0.2s;
+.filter-bar {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 24px; border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
-.filter-row button:hover { border-color: #ff4757; color: #ff4757; }
-.filter-row button.active { background: #ff4757; color: #fff; border-color: #ff4757; }
+.filter-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.filter-row:last-child { margin-bottom: 0; }
+.filter-label { font-size: 14px; color: var(--text-secondary); font-weight: 500; min-width: 50px; }
+.filter-row button {
+  padding: 7px 16px; border: 1px solid var(--border); border-radius: var(--radius-xl);
+  background: var(--bg-white); font-size: 13px; color: var(--text-secondary); cursor: pointer;
+  transition: border-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out), background-color var(--dur-1) var(--ease-out);
+}
+.filter-row button:hover { border-color: var(--primary); color: var(--primary); }
+.filter-row button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.loading, .empty { text-align: center; padding: 60px 20px; color: #999; font-size: 15px; }
+.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.loading, .empty {
+  text-align: center; padding: 72px 20px; color: var(--text-muted); font-size: 15px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+}
 
 @media (max-width: 1024px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
 </style>

@@ -1,9 +1,12 @@
 <script setup>
-import { computed, ref, onMounted, onActivated, onDeactivated } from 'vue'
+import { ref, onMounted, onActivated, onDeactivated } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '../stores/product'
 import { useCartStore } from '../stores/cart'
 import ProductCard from '../components/common/ProductCard.vue'
+import BrandMarquee from '../components/vuebits/BrandMarquee.vue'
+import HorizontalRail from '../components/common/HorizontalRail.vue'
+import HeroAurora from '../components/vuebits/HeroAurora.vue'
 import { ElMessage } from 'element-plus'
 
 // ============ KeepAlive 生命周期演示 ============
@@ -18,22 +21,11 @@ const router = useRouter()
 const productStore = useProductStore()
 const cartStore = useCartStore()
 
-// ============ Element Plus 轮播组件替换手写轮播 ============
+// ============ Element Plus el-carousel 轮播组件（品牌化 Hero） ============
 const banners = ref([
-  { id: 1, title: '618年中大促', subtitle: '全场低至5折', color: '#ff4757' },
-  { id: 2, title: '新品首发', subtitle: '最新数码好物', color: '#3742fa' },
-  { id: 3, title: '生鲜特惠', subtitle: '新鲜直达你家', color: '#2ed573' },
-])
-
-const hotProducts = computed(() => productStore.list.filter((item) => item.isHot))
-const newProductCount = computed(() => productStore.list.filter((item) => item.isNew).length)
-const totalSales = computed(() => productStore.list.reduce((sum, item) => sum + item.sales, 0))
-const categoryCount = computed(() => productStore.categories.length)
-const homeStats = computed(() => [
-  { label: '推荐商品', value: productStore.list.length, suffix: '件' },
-  { label: '热销商品', value: hotProducts.value.length, suffix: '件' },
-  { label: '新品数量', value: newProductCount.value, suffix: '件' },
-  { label: '展示销量', value: totalSales.value, suffix: '单' },
+  { id: 1, eyebrow: '限时狂欢', title: '618 年中大促', subtitle: '全场低至 5 折，好物闭眼入', cta: '立即抢购' },
+  { id: 2, eyebrow: '新品首发', title: '最新数码好物', subtitle: '前沿科技，先人一步尝鲜', cta: '去看看' },
+  { id: 3, eyebrow: '生鲜直达', title: '当季鲜货特惠', subtitle: '产地直发，新鲜到你家', cta: '马上挑' },
 ])
 
 onMounted(async () => {
@@ -47,6 +39,9 @@ onMounted(async () => {
 function goProducts(categoryId) {
   router.push({ name: 'ProductList', query: { categoryId } })
 }
+function goShop() {
+  router.push({ name: 'ProductList' })
+}
 
 function quickAddToCart(product) {
   cartStore.addToCart(product)
@@ -57,33 +52,45 @@ function quickAddToCart(product) {
 const isAdmin = (() => {
   try {
     return JSON.parse(localStorage.getItem('ec_mall_user') || '{}').role === 'admin'
-  } catch { return false }
+  } catch {
+    return false
+  }
 })()
 </script>
 
 <template>
   <div class="home">
-    <!-- ============ Element Plus el-carousel 轮播 ============ -->
-    <div class="banner-section">
-      <el-carousel :interval="4000" arrow="hover" height="200px">
-        <el-carousel-item v-for="b in banners" :key="b.id">
-          <div class="banner-slide" :style="{ background: b.color }">
-            <h2>{{ b.title }}</h2>
-            <p>{{ b.subtitle }}</p>
-          </div>
-        </el-carousel-item>
-      </el-carousel>
-    </div>
+    <!-- ============ 品牌化 Hero（el-carousel + 极光背景） ============ -->
+    <section class="hero">
+      <HeroAurora :blobs="3" />
+      <div class="hero__carousel">
+        <el-carousel :interval="4500" arrow="hover" height="300px" trigger="click">
+          <el-carousel-item v-for="b in banners" :key="b.id">
+            <div class="hero-slide">
+              <span class="hero-slide__eyebrow">{{ b.eyebrow }}</span>
+              <h2 class="hero-slide__title">{{ b.title }}</h2>
+              <p class="hero-slide__subtitle">{{ b.subtitle }}</p>
+              <button class="btn btn--primary hero-slide__cta" @click="goShop">
+                {{ b.cta }}
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </button>
+            </div>
+          </el-carousel-item>
+        </el-carousel>
+      </div>
+    </section>
 
-    <div class="home-stats">
-      <el-card v-for="item in homeStats" :key="item.label" shadow="hover" class="home-stat-card">
-        <el-statistic :title="item.label" :value="item.value" :suffix="item.suffix" />
-      </el-card>
-    </div>
+    <!-- 品牌跑马灯：增加节奏与活力，破网格单调 -->
+    <BrandMarquee :items="['APPLE', 'SONY', 'DYSON', 'XIAOMI', 'HUAWEI', 'NINTENDO', 'SAMSUNG']" />
 
     <!-- 分类入口 -->
-    <section class="section">
-      <h2 class="section__title">商品分类（{{ categoryCount }} 类）</h2>
+    <section class="section" v-reveal>
+      <div class="section__head">
+        <h2 class="section__title">逛分类</h2>
+        <router-link class="section__more" :to="{ name: 'ProductList' }">全部分类 ›</router-link>
+      </div>
       <div class="categories">
         <div
           v-for="cat in productStore.categories"
@@ -98,13 +105,17 @@ const isAdmin = (() => {
     </section>
 
     <!-- 热销推荐（使用 ProductCard 插槽） -->
-    <section class="section">
-      <h2 class="section__title">🔥 热销推荐</h2>
+    <section class="section" v-reveal>
+      <div class="section__head">
+        <h2 class="section__title">热销推荐</h2>
+        <router-link class="section__more" :to="{ name: 'ProductList' }">查看更多 ›</router-link>
+      </div>
       <div class="product-grid">
         <ProductCard
-          v-for="product in hotProducts"
+          v-for="product in productStore.list"
           :key="product.id"
           :product="product"
+          @add="quickAddToCart"
         >
           <!--
             ============ 具名插槽 #tags 演示 ============
@@ -116,14 +127,14 @@ const isAdmin = (() => {
               type="danger"
               size="small"
               effect="dark"
-              style="position: absolute; top: 8px; right: 8px;"
-            >🔥 热卖</el-tag>
+              class="card-tag card-tag--hot"
+            >热卖</el-tag>
             <el-tag
               v-if="product.isNew"
               type="success"
               size="small"
               effect="dark"
-              style="position: absolute; top: 8px; left: 8px;"
+              class="card-tag card-tag--new"
             >新品</el-tag>
           </template>
 
@@ -138,17 +149,34 @@ const isAdmin = (() => {
               round
               @click="quickAddToCart(product)"
             >
-              🛒 快捷加购
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+              快捷加购
             </el-button>
           </template>
         </ProductCard>
       </div>
     </section>
 
+    <!-- 横滑货架：编辑式排版，破统一竖向网格 -->
+    <HorizontalRail title="为你推荐" more="查看更多 ›" v-reveal>
+      <ProductCard
+        v-for="p in productStore.list"
+        :key="'rec' + p.id"
+        :product="p"
+        @add="quickAddToCart"
+      />
+    </HorizontalRail>
+
     <!-- v-permission 演示 -->
     <div v-if="isAdmin" class="admin-entry">
       <el-button type="primary" @click="router.push('/')">
-        ⚙️ 进入管理后台（仅管理员可见）
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+        进入管理后台（仅管理员可见）
       </el-button>
     </div>
   </div>
@@ -161,65 +189,142 @@ const isAdmin = (() => {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Banner */
-.banner-section { border-radius: 16px; overflow: hidden; margin-bottom: 32px; }
+/* Hero */
+.hero {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 24px;
+  background: var(--brand-gradient);
+  box-shadow: var(--shadow-md);
+}
 
-.banner-slide {
+.hero__carousel {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-slide {
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  padding: 0 56px;
   color: #fff;
 }
-
-.banner-slide h2 { font-size: 36px; margin: 0 0 8px; color: #fff; font-weight: 700; }
-.banner-slide p { font-size: 18px; margin: 0; opacity: 0.9; }
-
-/* Section */
-.section { margin-bottom: 32px; }
-.section__title {
-  font-size: 22px; font-weight: 700; color: #333; margin: 0 0 16px;
-  padding-bottom: 8px; border-bottom: 2px solid #ff4757; display: inline-block;
+.hero-slide__eyebrow {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.92;
+  margin-bottom: 10px;
 }
-
-.home-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 28px;
+.hero-slide__title {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  margin: 0 0 12px;
+  color: #fff;
+  letter-spacing: 0.01em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
 }
-
-.home-stat-card {
-  border-radius: 8px;
+.hero-slide__subtitle {
+  font-size: clamp(14px, 1.6vw, 18px);
+  margin: 0 0 24px;
+  opacity: 0.94;
+}
+.hero-slide__cta {
+  background: #fff !important;
+  color: var(--primary) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18) !important;
+}
+.hero-slide__cta:hover {
+  transform: translateY(-1px);
 }
 
 /* Categories */
 .categories {
-  display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
 }
 .category-item {
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-  padding: 20px 8px; background: #fff; border-radius: 12px; cursor: pointer;
-  transition: all 0.2s; border: 1px solid #f0f0f0;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  border: 1px solid var(--glass-border);
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 8px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: transform var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out);
 }
-.category-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,71,87,0.15); border-color: #ff4757; }
-.category-icon { font-size: 32px; }
-.category-name { font-size: 13px; color: #333; font-weight: 500; }
+.category-item:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-light);
+}
+.category-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+.category-name {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
 
 /* Product Grid */
-.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.card-tag {
+  position: absolute;
+  top: 8px;
+}
+.card-tag--hot {
+  right: 8px;
+}
+.card-tag--new {
+  left: 8px;
+}
 
-.admin-entry { text-align: center; margin-top: 20px; }
+.admin-entry {
+  text-align: center;
+  margin-top: 24px;
+}
+.admin-entry :deep(.el-button) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
 @media (max-width: 1024px) {
-  .product-grid { grid-template-columns: repeat(3, 1fr); }
-  .categories { grid-template-columns: repeat(3, 1fr); }
-  .home-stats { grid-template-columns: repeat(2, 1fr); }
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .categories {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 @media (max-width: 640px) {
-  .product-grid { grid-template-columns: repeat(2, 1fr); }
-  .categories { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .home-stats { grid-template-columns: 1fr; }
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .categories {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .hero-slide {
+    padding: 0 28px;
+  }
 }
 </style>

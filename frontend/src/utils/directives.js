@@ -64,6 +64,33 @@ export const vPermission = {
   },
 }
 
+// ============ v-reveal：滚动渐入 ============
+// 用法：<div v-reveal> 或 <div v-reveal="{ delay: 120 }">
+// 元素进入视口时添加 .js-reveal--in 触发渐入；尊重减弱动效偏好
+export const vReveal = {
+  mounted(el, binding) {
+    const reduce =
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce) return
+
+    el.classList.add('js-reveal')
+    if (binding.value?.delay) {
+      el.style.transitionDelay = `${binding.value.delay}ms`
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add('js-reveal--in')
+          observer.unobserve(el)
+        }
+      },
+      { rootMargin: '0px 0px -10% 0px' },
+    )
+    observer.observe(el)
+  },
+}
+
 /**
  * 注册所有全局指令
  * @param {import('vue').App} app
@@ -72,4 +99,5 @@ export function registerDirectives(app) {
   app.directive('focus', vFocus)
   app.directive('lazy', vLazy)
   app.directive('permission', vPermission)
+  app.directive('reveal', vReveal)
 }

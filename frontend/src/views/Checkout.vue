@@ -37,6 +37,7 @@ async function submitOrder() {
         price: i.price,
         quantity: i.quantity,
         image: i.image,
+        isFlash: i.isFlash,
       })),
       address: {
         name: address.value.name,
@@ -69,7 +70,7 @@ async function submitOrder() {
     <h1 class="page-title">确认订单</h1>
 
     <!-- 收货地址 -->
-    <section class="section">
+    <section class="section" v-reveal>
       <h3>收货地址</h3>
       <div class="address-card">
         <p><strong>{{ address.name }}</strong> {{ address.mobile }}</p>
@@ -80,7 +81,7 @@ async function submitOrder() {
     </section>
 
     <!-- 商品清单 -->
-    <section class="section">
+    <section class="section" v-reveal>
       <h3>商品清单</h3>
       <div class="item-list">
         <div v-for="item in cartStore.checkedItems" :key="item.productId" class="item">
@@ -95,7 +96,7 @@ async function submitOrder() {
     </section>
 
     <!-- 订单合计 -->
-    <section class="section summary">
+    <section class="section summary" v-reveal>
       <div class="summary-row">
         <span>商品合计</span>
         <span class="price">{{ formatPrice(cartStore.totalPrice) }}</span>
@@ -122,38 +123,39 @@ async function submitOrder() {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.page-title { font-size: 24px; font-weight: 700; color: #333; margin: 0 0 20px; }
+.page-title { font-size: var(--text-2xl); font-weight: 700; color: var(--text-primary); margin: 0 0 20px; }
 
 .section {
-  background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px;
+  -webkit-backdrop-filter: blur(var(--glass-blur)); backdrop-filter: blur(var(--glass-blur));
 }
-.section h3 { font-size: 16px; font-weight: 600; color: #333; margin: 0 0 12px; }
+.section h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); margin: 0 0 12px; }
 
-.address-card { font-size: 14px; color: #333; }
+.address-card { font-size: 14px; color: var(--text-primary); }
 .address-card p { margin: 4px 0; }
-.addr-full { color: #666; }
+.addr-full { color: var(--text-secondary); }
 
 .item-list { display: flex; flex-direction: column; gap: 12px; }
 .item { display: flex; align-items: center; gap: 12px; }
-.item img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
+.item img { width: 60px; height: 60px; object-fit: cover; border-radius: var(--radius-sm); }
 .item-info { flex: 1; }
-.item-info h4 { font-size: 14px; font-weight: 500; margin: 0 0 4px; }
-.item-price { font-size: 13px; color: #999; }
-.item-total { font-size: 16px; font-weight: 600; color: #333; }
+.item-info h4 { font-size: 14px; font-weight: 500; color: var(--text-primary); margin: 0 0 4px; }
+.item-price { font-size: 13px; color: var(--text-muted); }
+.item-total { font-size: 16px; font-weight: 600; color: var(--text-primary); }
 
 .summary { }
 .summary-row {
-  display: flex; justify-content: space-between; font-size: 14px; color: #666;
+  display: flex; justify-content: space-between; font-size: 14px; color: var(--text-secondary);
   padding: 8px 0;
 }
-.summary-row.total { border-top: 1px solid #f0f0f0; margin-top: 8px; padding-top: 12px; font-size: 16px; font-weight: 600; color: #333; }
-.price { color: #ff4757; font-weight: 600; }
+.summary-row.total { border-top: 1px solid var(--border-light); margin-top: 8px; padding-top: 12px; font-size: 16px; font-weight: 600; color: var(--text-primary); }
+.price { color: var(--primary); font-weight: 600; }
 
 .submit-btn {
-  width: 100%; padding: 16px; background: linear-gradient(135deg, #ff4757, #ff6b81);
-  color: #fff; border: none; border-radius: 12px; font-size: 18px; font-weight: 600;
-  cursor: pointer; transition: all 0.3s;
+  width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff; border: none; border-radius: var(--radius-md); font-size: 18px; font-weight: 600;
+  cursor: pointer; transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out), opacity var(--dur-1) var(--ease-out);
 }
-.submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.submit-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-brand); }
+.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 </style>

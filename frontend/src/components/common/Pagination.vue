@@ -64,24 +64,26 @@ function go(page) {
 .pagination button {
   min-width: 36px;
   height: 36px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  background: #fff;
-  color: #333;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-white);
+  color: var(--text-primary);
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out),
+    background-color var(--dur-1) var(--ease-out);
 }
 
 .pagination button:hover:not(:disabled):not(.ellipsis) {
-  border-color: #ff4757;
-  color: #ff4757;
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .pagination button.active {
-  background: #ff4757;
+  background: var(--primary);
   color: #fff;
-  border-color: #ff4757;
+  border-color: var(--primary);
 }
 
 .pagination button.ellipsis {
