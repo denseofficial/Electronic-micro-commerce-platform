@@ -31,7 +31,10 @@ const sortOptions = [
 ]
 
 async function loadData() {
-  await productStore.fetchProducts({ categoryId: categoryId.value, sort: sort.value, page: page.value, pageSize })
+  const params = { page: page.value, pageSize }
+  if (categoryId.value) params.categoryId = categoryId.value
+  if (sort.value) params.sort = sort.value
+  await productStore.fetchProducts(params)
 }
 
 onMounted(() => {
