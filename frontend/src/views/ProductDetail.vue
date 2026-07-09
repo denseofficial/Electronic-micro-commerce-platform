@@ -3,7 +3,9 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductStore } from '../stores/product'
 import { useCartStore } from '../stores/cart'
-import { formatPrice } from '../utils/format'
+import { useAuthStore } from '../stores/auth'
+import { formatPrice, formatDate } from '../utils/format'
+import { getReviews, createReview } from '../api/reviews'
 import StarRating from '../components/common/StarRating.vue'
 import ProductSpecTable from '../components/product/ProductSpecTable.vue'
 import { ElMessage } from 'element-plus'
@@ -12,18 +14,60 @@ const route = useRoute()
 const router = useRouter()
 const productStore = useProductStore()
 const cartStore = useCartStore()
+const authStore = useAuthStore()
 
 const product = computed(() => productStore.currentProduct)
 const currentImage = ref(0)
 const quantity = ref(1)
 const addingToCart = ref(false)
 
+const reviewsData = ref({ items: [], average: 0, total: 0 })
+const reviewForm = ref({ rating: 5, content: '' })
+const submittingReview = ref(false)
+
 onMounted(async () => {
   const id = route.params.id
   await productStore.fetchProductDetail(id)
   currentImage.value = 0
   quantity.value = 1
+  await loadReviews(id)
 })
+
+async function loadReviews(id) {
+  const res = await getReviews(id)
+  reviewsData.value = res.data
+}
+
+async function submitReview() {
+  if (!authStore.isLoggedIn) {
+    ElMessage.warning('请先登录后再评价')
+    router.push({ name: 'Login', query: { redirect: `/product/${route.params.id}` } })
+    return
+  }
+  if (reviewForm.value.content.trim().length < 1) {
+    ElMessage.warning('请输入评价内容')
+    return
+  }
+  submittingReview.value = true
+  try {
+    const res = await createReview(route.params.id, {
+      rating: reviewForm.value.rating,
+      content: reviewForm.value.content.trim(),
+    })
+    ElMessage.success('评价成功')
+    reviewForm.value = { rating: 5, content: '' }
+    await loadReviews(route.params.id)
+    // 同步更新商品详情的评分聚合
+    if (productStore.currentProduct) {
+      productStore.currentProduct.rating = res.data.average
+      productStore.currentProduct.reviews = res.data.total
+    }
+  } catch (e) {
+    ElMessage.error('评价失败：' + (e.response?.data?.message || e.message || '未知错误'))
+  } finally {
+    submittingReview.value = false
+  }
+}
 
 function goBack() {
   router.back()
@@ -111,6 +155,58 @@ function buyNow() {
         </div>
       </div>
     </div>
+
+    <!-- 商品评价 -->
+    <section class="reviews">
+      <div class="reviews__head">
+        <h2>商品评价</h2>
+        <div class="reviews__summary">
+          <StarRating :rating="reviewsData.average" />
+          <span class="reviews__score">{{ reviewsData.average }}</span>
+          <span class="reviews__count">{{ reviewsData.total }} 条评价</span>
+        </div>
+      </div>
+
+      <div v-if="authStore.isLoggedIn" class="review-form">
+        <div class="star-input">
+          <span
+            v-for="n in 5"
+            :key="n"
+            class="star-opt"
+            :class="{ active: n <= reviewForm.rating }"
+            @click="reviewForm.rating = n"
+          >★</span>
+          <span class="star-input__hint">点击评分</span>
+        </div>
+        <el-input
+          v-model="reviewForm.content"
+          type="textarea"
+          :rows="3"
+          maxlength="500"
+          show-word-limit
+          placeholder="说说你对这件商品的使用感受～"
+        />
+        <button class="review-submit" :disabled="submittingReview" @click="submitReview">
+          {{ submittingReview ? '提交中...' : '发表评价' }}
+        </button>
+      </div>
+      <p v-else class="review-login-tip">
+        登录后可发表评价 ·
+        <router-link :to="{ name: 'Login', query: { redirect: $route.fullPath } }">去登录</router-link>
+      </p>
+
+      <ul v-if="reviewsData.items.length" class="review-list">
+        <li v-for="rv in reviewsData.items" :key="rv.id" class="review-item">
+          <div class="review-item__head">
+            <span class="review-item__user">{{ rv.nickname }}</span>
+            <StarRating :rating="rv.rating" />
+          </div>
+          <p class="review-item__content">{{ rv.content }}</p>
+          <span class="review-item__time">{{ formatDate(rv.createTime) }}</span>
+        </li>
+      </ul>
+      <p v-else class="review-empty">暂无评价，快来抢沙发～</p>
+    </section>
   </div>
   <div v-else class="loading">加载中...</div>
 </template>
@@ -220,6 +316,41 @@ function buyNow() {
 .btn--buy:hover { transform: translateY(-1px); box-shadow: var(--shadow-brand); }
 
 .loading { text-align: center; padding: 80px; color: var(--text-muted); }
+
+/* Reviews */
+.reviews {
+  margin-top: 24px; background: var(--bg-white); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 24px;
+}
+.reviews__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.reviews__head h2 { font-size: var(--text-lg); font-weight: 700; color: var(--text-primary); margin: 0; }
+.reviews__summary { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+.reviews__score { color: var(--warning); font-weight: 700; font-size: 16px; }
+
+.review-form { display: flex; flex-direction: column; gap: 12px; padding: 16px; background: var(--surface-2); border-radius: var(--radius-md); margin-bottom: 16px; }
+.star-input { display: flex; align-items: center; gap: 4px; }
+.star-opt { font-size: 24px; color: var(--border); cursor: pointer; transition: color var(--dur-1) var(--ease-out); }
+.star-opt.active { color: var(--warning); }
+.star-input__hint { margin-left: 8px; font-size: 12px; color: var(--text-muted); }
+.review-submit {
+  align-self: flex-end; padding: 10px 28px; border: none; border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #fff;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
+}
+.review-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-brand); }
+.review-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.review-login-tip { font-size: 14px; color: var(--text-muted); padding: 16px; background: var(--surface-2); border-radius: var(--radius-md); margin: 0 0 16px; }
+.review-login-tip a { color: var(--primary); text-decoration: none; }
+
+.review-list { list-style: none; padding: 0; margin: 0; }
+.review-item { padding: 16px 0; border-bottom: 1px solid var(--border-light); }
+.review-item:last-child { border-bottom: none; }
+.review-item__head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.review-item__user { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.review-item__content { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin: 0 0 6px; white-space: pre-wrap; }
+.review-item__time { font-size: 12px; color: var(--text-muted); }
+.review-empty { text-align: center; color: var(--text-muted); padding: 24px 0; font-size: 14px; }
 
 @media (max-width: 768px) {
   .detail__main { grid-template-columns: 1fr; }

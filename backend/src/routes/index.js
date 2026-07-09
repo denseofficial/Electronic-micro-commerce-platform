@@ -3,6 +3,7 @@ import authRoutes from './auth.js'
 import productRoutes from './products.js'
 import orderRoutes from './orders.js'
 import userRoutes from './users.js'
+import reviewRoutes from './reviews.js'
 import { getCategories } from '../controllers/productController.js'
 
 const router = Router()
@@ -21,5 +22,8 @@ router.use('/orders', orderRoutes)
 
 // /api/users/*
 router.use('/users', userRoutes)
+
+// /api/reviews/*
+router.use('/reviews', reviewRoutes)
 
 export default router
