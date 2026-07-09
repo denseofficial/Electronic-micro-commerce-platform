@@ -30,6 +30,12 @@ const routes = [
         meta: { title: '搜索' },
       },
       {
+        path: 'stats',
+        name: 'DataStats',
+        component: () => import('../views/DataStats.vue'),
+        meta: { title: '数据统计' },
+      },
+      {
         path: 'cart',
         name: 'Cart',
         component: () => import('../views/Cart.vue'),

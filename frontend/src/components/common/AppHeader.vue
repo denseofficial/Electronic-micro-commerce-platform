@@ -70,6 +70,7 @@ cartStore.fetchCart()
       <nav class="header__nav">
         <router-link to="/" class="nav-link">首页</router-link>
         <router-link to="/products" class="nav-link">全部商品</router-link>
+        <router-link to="/stats" class="nav-link">数据统计</router-link>
 
         <router-link to="/cart" class="nav-link nav-link--cart">
           <CartBadge :count="cartStore.totalCount" />

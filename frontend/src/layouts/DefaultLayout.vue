@@ -5,7 +5,7 @@ import AppFooter from '../components/common/AppFooter.vue'
 // ============ KeepAlive 组件缓存 ============
 // 缓存 ProductList 和 Search 页面，保留滚动位置和搜索状态
 // include 指定需要缓存的组件名称（组件的 name 属性或 __name）
-const cachedViews = ['ProductList', 'Search', 'Home']
+const cachedViews = ['ProductList', 'Search', 'Home', 'DataStats']
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onActivated, onDeactivated } from 'vue'
+import { computed, ref, onMounted, onActivated, onDeactivated } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '../stores/product'
 import { useCartStore } from '../stores/cart'
@@ -23,6 +23,17 @@ const banners = ref([
   { id: 1, title: '618年中大促', subtitle: '全场低至5折', color: '#ff4757' },
   { id: 2, title: '新品首发', subtitle: '最新数码好物', color: '#3742fa' },
   { id: 3, title: '生鲜特惠', subtitle: '新鲜直达你家', color: '#2ed573' },
+])
+
+const hotProducts = computed(() => productStore.list.filter((item) => item.isHot))
+const newProductCount = computed(() => productStore.list.filter((item) => item.isNew).length)
+const totalSales = computed(() => productStore.list.reduce((sum, item) => sum + item.sales, 0))
+const categoryCount = computed(() => productStore.categories.length)
+const homeStats = computed(() => [
+  { label: '推荐商品', value: productStore.list.length, suffix: '件' },
+  { label: '热销商品', value: hotProducts.value.length, suffix: '件' },
+  { label: '新品数量', value: newProductCount.value, suffix: '件' },
+  { label: '展示销量', value: totalSales.value, suffix: '单' },
 ])
 
 onMounted(async () => {
@@ -64,9 +75,15 @@ const isAdmin = (() => {
       </el-carousel>
     </div>
 
+    <div class="home-stats">
+      <el-card v-for="item in homeStats" :key="item.label" shadow="hover" class="home-stat-card">
+        <el-statistic :title="item.label" :value="item.value" :suffix="item.suffix" />
+      </el-card>
+    </div>
+
     <!-- 分类入口 -->
     <section class="section">
-      <h2 class="section__title">商品分类</h2>
+      <h2 class="section__title">商品分类（{{ categoryCount }} 类）</h2>
       <div class="categories">
         <div
           v-for="cat in productStore.categories"
@@ -85,7 +102,7 @@ const isAdmin = (() => {
       <h2 class="section__title">🔥 热销推荐</h2>
       <div class="product-grid">
         <ProductCard
-          v-for="product in productStore.list"
+          v-for="product in hotProducts"
           :key="product.id"
           :product="product"
         >
@@ -166,6 +183,17 @@ const isAdmin = (() => {
   padding-bottom: 8px; border-bottom: 2px solid #ff4757; display: inline-block;
 }
 
+.home-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.home-stat-card {
+  border-radius: 8px;
+}
+
 /* Categories */
 .categories {
   display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px;
@@ -187,9 +215,11 @@ const isAdmin = (() => {
 @media (max-width: 1024px) {
   .product-grid { grid-template-columns: repeat(3, 1fr); }
   .categories { grid-template-columns: repeat(3, 1fr); }
+  .home-stats { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 640px) {
   .product-grid { grid-template-columns: repeat(2, 1fr); }
   .categories { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .home-stats { grid-template-columns: 1fr; }
 }
 </style>

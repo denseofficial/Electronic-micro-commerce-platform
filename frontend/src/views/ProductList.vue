@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, onActivated, onDeactivated } from 'vue'
+import { computed, reactive, onMounted, watch, onActivated, onDeactivated } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductStore } from '../stores/product'
 import ProductCard from '../components/common/ProductCard.vue'
@@ -18,33 +18,64 @@ const route = useRoute()
 const router = useRouter()
 const productStore = useProductStore()
 
-const categoryId = ref(Number(route.query.categoryId) || 0)
-const sort = ref(route.query.sort || '')
-const page = ref(Number(route.query.page) || 1)
-const pageSize = 8
+const filters = reactive({
+  categoryId: Number(route.query.categoryId) || 0,
+  sort: route.query.sort || '',
+  page: Number(route.query.page) || 1,
+  pageSize: 8,
+})
 
 const sortOptions = [
   { value: '', label: '默认' },
   { value: 'sales', label: '销量优先' },
-  { value: 'price-asc', label: '价格↑' },
-  { value: 'price-desc', label: '价格↓' },
+  { value: 'price-asc', label: '价格升序' },
+  { value: 'price-desc', label: '价格降序' },
 ]
 
+const totalPages = computed(() => Math.ceil(productStore.total / filters.pageSize))
+const currentCategoryName = computed(() => {
+  if (!filters.categoryId) return '全部分类'
+  return productStore.categories.find((cat) => cat.id === filters.categoryId)?.name || '未知分类'
+})
+const currentSortName = computed(() => {
+  return sortOptions.find((item) => item.value === filters.sort)?.label || '默认'
+})
+const hasFilter = computed(() => Boolean(filters.categoryId || filters.sort))
+const resultSummary = computed(() => {
+  const prefix = hasFilter.value ? `${currentCategoryName.value} / ${currentSortName.value}` : '全部商品'
+  return `${prefix}，共找到 ${productStore.total} 件商品`
+})
+
 async function loadData() {
-  await productStore.fetchProducts({ categoryId: categoryId.value, sort: sort.value, page: page.value, pageSize })
+  await productStore.fetchProducts({
+    categoryId: filters.categoryId,
+    sort: filters.sort,
+    page: filters.page,
+    pageSize: filters.pageSize,
+  })
 }
 
 onMounted(() => {
   productStore.fetchCategories()
-  loadData()
 })
 
-watch(() => route.query, (q) => {
-  categoryId.value = Number(q.categoryId) || 0
-  sort.value = q.sort || ''
-  page.value = Number(q.page) || 1
-  loadData()
-})
+watch(
+  () => route.query,
+  (q) => {
+    filters.categoryId = Number(q.categoryId) || 0
+    filters.sort = q.sort || ''
+    filters.page = Number(q.page) || 1
+  },
+  { immediate: true },
+)
+
+watch(
+  filters,
+  () => {
+    loadData()
+  },
+  { deep: true, immediate: true },
+)
 
 function setCategory(id) {
   router.push({ query: { ...route.query, categoryId: id || undefined, page: undefined } })
@@ -60,16 +91,17 @@ function onPageChange(p) {
 
 <template>
   <div class="product-list-page">
-    <h1 class="page-title">全部商品</h1>
+      <h1 class="page-title">全部商品</h1>
+      <p class="result-summary">{{ resultSummary }}</p>
 
     <!-- 分类筛选 -->
     <div class="filter-bar">
       <div class="filter-row">
         <span class="filter-label">分类：</span>
-        <button :class="{ active: categoryId === 0 }" @click="setCategory(0)">全部</button>
+        <button :class="{ active: filters.categoryId === 0 }" @click="setCategory(0)">全部</button>
         <button
           v-for="cat in productStore.categories" :key="cat.id"
-          :class="{ active: categoryId === cat.id }"
+          :class="{ active: filters.categoryId === cat.id }"
           @click="setCategory(cat.id)"
         >{{ cat.name }}</button>
       </div>
@@ -77,7 +109,7 @@ function onPageChange(p) {
         <span class="filter-label">排序：</span>
         <button
           v-for="opt in sortOptions" :key="opt.value"
-          :class="{ active: sort === opt.value }"
+          :class="{ active: filters.sort === opt.value }"
           @click="setSort(opt.value)"
         >{{ opt.label }}</button>
       </div>
@@ -98,8 +130,8 @@ function onPageChange(p) {
 
     <!-- 分页 -->
     <Pagination
-      :page="page"
-      :total-pages="Math.ceil(productStore.total / pageSize)"
+      :page="filters.page"
+      :total-pages="totalPages"
       @change="onPageChange"
     />
   </div>
@@ -112,6 +144,7 @@ function onPageChange(p) {
   to { opacity: 1; transform: translateY(0); }
 }
 .page-title { font-size: 24px; font-weight: 700; color: #333; margin: 0 0 20px; }
+.result-summary { color: #666; margin: -10px 0 18px; }
 
 .filter-bar { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 20px; border: 1px solid #f0f0f0; }
 .filter-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
