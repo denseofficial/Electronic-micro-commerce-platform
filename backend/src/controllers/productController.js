@@ -1,17 +1,13 @@
-/**
- * 商品控制器
- * 复用前端 Mock 数据作为后端数据源
- */
-
-import { products, categories } from '../../../frontend/src/mock/products.js'
+import { collection } from '../database/index.js'
 
 /**
  * 获取商品列表（支持分类、搜索、排序、分页）
+ * 数据源为后端 products 集合，不再依赖前端 mock。
  */
 export function getProducts(req, res) {
   const { categoryId, keyword, sort, page = 1, pageSize = 8 } = req.query
 
-  let list = [...products]
+  let list = [...collection('products').all()]
 
   // 分类筛选
   if (categoryId) {
@@ -54,7 +50,7 @@ export function getProducts(req, res) {
  * 获取商品详情
  */
 export function getProductDetail(req, res) {
-  const product = products.find((p) => p.id === Number(req.params.id))
+  const product = collection('products').findOne({ id: Number(req.params.id) })
   if (!product) {
     return res.status(404).json({ code: 404, message: '商品不存在' })
   }
@@ -65,5 +61,5 @@ export function getProductDetail(req, res) {
  * 获取分类列表
  */
 export function getCategories(_req, res) {
-  res.json({ code: 200, data: categories })
+  res.json({ code: 200, data: collection('categories').all() })
 }

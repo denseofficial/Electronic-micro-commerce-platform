@@ -39,3 +39,19 @@ export function payOrder(orderId) {
 export function cancelOrder(orderId) {
   return request.post(`/orders/${orderId}/cancel`)
 }
+
+/**
+ * 发货（演示）
+ * POST /api/orders/:id/ship
+ */
+export function shipOrder(orderId) {
+  return request.post(`/orders/${orderId}/ship`)
+}
+
+/**
+ * 确认收货
+ * POST /api/orders/:id/receive
+ */
+export function confirmReceive(orderId) {
+  return request.post(`/orders/${orderId}/receive`)
+}
