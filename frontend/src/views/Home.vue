@@ -19,10 +19,11 @@ const productStore = useProductStore()
 const cartStore = useCartStore()
 
 // ============ Element Plus 轮播组件替换手写轮播 ============
+// 限定暖色系，贴合 Refined Commerce 红色收敛方向
 const banners = ref([
   { id: 1, title: '618年中大促', subtitle: '全场低至5折', color: '#ff4757' },
-  { id: 2, title: '新品首发', subtitle: '最新数码好物', color: '#3742fa' },
-  { id: 3, title: '生鲜特惠', subtitle: '新鲜直达你家', color: '#2ed573' },
+  { id: 2, title: '新品首发', subtitle: '最新数码好物', color: '#ff7f50' },
+  { id: 3, title: '生鲜特惠', subtitle: '新鲜直达你家', color: '#ffa502' },
 ])
 
 onMounted(async () => {
@@ -145,51 +146,63 @@ const isAdmin = (() => {
 }
 
 /* Banner */
-.banner-section { border-radius: 16px; overflow: hidden; margin-bottom: 32px; }
+.banner-section { border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 40px; }
 
 .banner-slide {
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  padding: 0 48px;
   color: #fff;
+  background-image: linear-gradient(120deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0));
 }
 
-.banner-slide h2 { font-size: 36px; margin: 0 0 8px; color: #fff; font-weight: 700; }
-.banner-slide p { font-size: 18px; margin: 0; opacity: 0.9; }
+.banner-slide h2 { font-size: 38px; margin: 0 0 10px; color: #fff; font-weight: 700; letter-spacing: 0.01em; }
+.banner-slide p { font-size: 18px; margin: 0; opacity: 0.92; }
 
 /* Section */
-.section { margin-bottom: 32px; }
+.section { margin-bottom: 40px; }
 .section__title {
-  font-size: 22px; font-weight: 700; color: #333; margin: 0 0 16px;
-  padding-bottom: 8px; border-bottom: 2px solid #ff4757; display: inline-block;
+  font-size: var(--text-2xl); font-weight: 700; color: var(--text-primary);
+  margin: 0 0 20px; padding-left: 12px; border-left: 3px solid var(--primary);
+  line-height: 1.2;
 }
 
 /* Categories */
 .categories {
-  display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px;
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px;
 }
 .category-item {
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-  padding: 20px 8px; background: #fff; border-radius: 12px; cursor: pointer;
-  transition: all 0.2s; border: 1px solid #f0f0f0;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 22px 8px; background: var(--bg-white); border-radius: var(--radius-md);
+  cursor: pointer; border: 1px solid var(--border);
+  transition: transform var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out);
 }
-.category-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,71,87,0.15); border-color: #ff4757; }
+.category-item:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-light);
+}
 .category-icon { font-size: 32px; }
-.category-name { font-size: 13px; color: #333; font-weight: 500; }
+.category-name { font-size: 13px; color: var(--text-primary); font-weight: 500; }
 
 /* Product Grid */
-.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 
-.admin-entry { text-align: center; margin-top: 20px; }
+.admin-entry { text-align: center; margin-top: 24px; }
 
 @media (max-width: 1024px) {
   .product-grid { grid-template-columns: repeat(3, 1fr); }
   .categories { grid-template-columns: repeat(3, 1fr); }
 }
 @media (max-width: 640px) {
-  .product-grid { grid-template-columns: repeat(2, 1fr); }
-  .categories { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .categories { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .banner-slide { padding: 0 24px; }
+  .banner-slide h2 { font-size: 28px; }
 }
 </style>

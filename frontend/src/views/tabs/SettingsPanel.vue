@@ -9,8 +9,8 @@ const updateSiteConfig = inject('updateSiteConfig')
 // 使用 ref 做本地编辑
 const themeColor = ref(siteConfig?.themeColor || '#ff4757')
 
-// 预设主题色
-const presetColors = ['#ff4757', '#3742fa', '#2ed573', '#ff6348', '#a55eea']
+// 预设主题色（暖色系，与 AppHeader 主题切换保持一致）
+const presetColors = ['#ff4757', '#ff6348', '#ff7f50', '#ffa502', '#e84393']
 
 function applyColor(color) {
   themeColor.value = color
@@ -50,7 +50,7 @@ function applyColor(color) {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-h3 { font-size: 16px; color: #333; margin: 0 0 16px; }
+h3 { font-size: 16px; color: var(--text-primary); margin: 0 0 16px; }
 .color-grid { display: flex; gap: 12px; margin-bottom: 16px; }
 .color-btn {
   width: 44px; height: 44px; border-radius: 50%; border: 3px solid transparent;
@@ -58,7 +58,7 @@ h3 { font-size: 16px; color: #333; margin: 0 0 16px; }
   display: flex; align-items: center; justify-content: center;
   transition: all 0.2s;
 }
-.color-btn.active { border-color: #333; transform: scale(1.15); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-.hint { font-size: 14px; color: #666; margin-bottom: 8px; }
-.note { font-size: 12px; color: #aaa; }
+.color-btn.active { border-color: var(--ink); transform: scale(1.15); box-shadow: 0 2px 8px var(--shadow-md); }
+.hint { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
+.note { font-size: 12px; color: var(--text-muted); }
 </style>

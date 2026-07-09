@@ -45,37 +45,38 @@ const siteConfig = inject('siteConfig')
 
 <style scoped>
 .footer {
-  background: #2c3e50;
-  color: #bdc3c7;
-  margin-top: 40px;
+  background: var(--ink);
+  color: var(--text-muted);
+  margin-top: 56px;
 }
 
 .footer__inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 16px 20px;
+  padding: 48px 16px 24px;
 }
 
 .footer__links {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
-  margin-bottom: 32px;
+  margin-bottom: 36px;
 }
 
 .footer__col h4 {
-  color: #ecf0f1;
-  font-size: 16px;
-  margin: 0 0 12px;
+  color: #fff;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  margin: 0 0 14px;
 }
 
 .footer__col a {
   display: block;
-  color: #bdc3c7;
+  color: var(--text-muted);
   text-decoration: none;
   font-size: 13px;
-  line-height: 2;
-  transition: color 0.2s;
+  line-height: 2.2;
+  transition: color var(--dur-1) var(--ease-out);
 }
 
 .footer__col a:hover {
@@ -83,8 +84,8 @@ const siteConfig = inject('siteConfig')
 }
 
 .footer__bottom {
-  border-top: 1px solid #3d5266;
-  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 24px;
   text-align: center;
   font-size: 12px;
 }

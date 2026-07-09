@@ -59,12 +59,12 @@ function onPageChange(p) {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.page-title { font-size: 22px; font-weight: 700; color: #333; margin: 0 0 20px; }
-.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.loading, .empty { text-align: center; padding: 80px 20px; color: #999; font-size: 15px; }
+.page-title { font-size: var(--text-2xl); font-weight: 700; color: var(--text-primary); margin: 0 0 20px; }
+.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.loading, .empty { text-align: center; padding: 80px 20px; color: var(--text-muted); font-size: 15px; }
 .empty p { font-size: 48px; margin: 0 0 12px; }
 .empty p:last-child { font-size: 15px; }
 
 @media (max-width: 1024px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
 </style>

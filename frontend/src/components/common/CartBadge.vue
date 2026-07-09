@@ -24,7 +24,7 @@ defineProps({
   position: absolute;
   top: -8px;
   right: -12px;
-  background: #ff4757;
+  background: var(--primary);
   color: #fff;
   font-size: 11px;
   font-weight: 700;

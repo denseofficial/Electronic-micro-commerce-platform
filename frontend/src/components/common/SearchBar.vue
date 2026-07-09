@@ -34,10 +34,15 @@ function handleSubmit() {
 .search-bar {
   display: flex;
   align-items: center;
-  border: 2px solid #ff4757;
-  border-radius: 20px;
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  background: #fff;
+  background: var(--bg-white);
+  transition: box-shadow var(--dur-1) var(--ease-out);
+}
+
+.search-bar:focus-within {
+  box-shadow: 0 0 0 3px var(--primary-bg);
 }
 
 .search-bar__input {
@@ -47,7 +52,7 @@ function handleSubmit() {
   padding: 8px 16px;
   font-size: 14px;
   background: transparent;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .search-bar__btn {
@@ -56,7 +61,7 @@ function handleSubmit() {
   padding: 8px 14px;
   cursor: pointer;
   font-size: 16px;
-  transition: transform 0.2s;
+  transition: transform var(--dur-1) var(--ease-out);
 }
 
 .search-bar__btn:hover {

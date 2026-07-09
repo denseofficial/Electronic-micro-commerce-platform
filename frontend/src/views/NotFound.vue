@@ -22,11 +22,12 @@ const router = useRouter()
   to { opacity: 1; transform: translateY(0); }
 }
 .icon { font-size: 72px; margin: 0; }
-h1 { font-size: 56px; color: #333; margin: 0 0 8px; }
-.desc { font-size: 16px; color: #999; margin: 0 0 24px; }
+h1 { font-size: 56px; color: var(--text-primary); margin: 0 0 8px; }
+.desc { font-size: 16px; color: var(--text-muted); margin: 0 0 24px; }
 .home-btn {
-  padding: 12px 40px; background: #ff4757; color: #fff;
-  border: none; border-radius: 8px; font-size: 16px; cursor: pointer;
+  padding: 12px 40px; background: var(--primary); color: #fff;
+  border: none; border-radius: var(--radius-md); font-size: 16px; cursor: pointer;
+  transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
-.home-btn:hover { opacity: 0.9; }
+.home-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-brand); }
 </style>

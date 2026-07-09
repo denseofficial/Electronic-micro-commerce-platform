@@ -99,12 +99,12 @@ const { formRef, loading, handleSubmit } = useForm(async () => {
 }
 .auth-card {
   width: 100%; max-width: 420px;
-  background: #fff; border-radius: 16px; padding: 40px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px;
+  box-shadow: var(--shadow-md);
 }
-h1 { font-size: 28px; font-weight: 700; color: #333; margin: 0; text-align: center; }
-.subtitle { text-align: center; color: #999; font-size: 14px; margin: 8px 0 24px; }
-.switch-link { text-align: center; font-size: 14px; color: #999; margin-top: 20px; }
-.switch-link a { color: #ff4757; text-decoration: none; font-weight: 500; }
-.hint { text-align: center; font-size: 12px; color: #bbb; margin-top: 12px; }
+h1 { font-size: 28px; font-weight: 700; color: var(--text-primary); margin: 0; text-align: center; }
+.subtitle { text-align: center; color: var(--text-muted); font-size: 14px; margin: 8px 0 24px; }
+.switch-link { text-align: center; font-size: 14px; color: var(--text-muted); margin-top: 20px; }
+.switch-link a { color: var(--primary); text-decoration: none; font-weight: 500; }
+.hint { text-align: center; font-size: 12px; color: var(--text-placeholder); margin-top: 12px; }
 </style>

@@ -116,28 +116,28 @@ async function handleSave() {
 
 .info-card {
   text-align: center; padding: 24px;
-  background: linear-gradient(135deg, #ff4757, #ff6b81);
-  border-radius: 12px; color: #fff; margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  border-radius: var(--radius-md); color: #fff; margin-bottom: 16px;
 }
 .avatar { font-size: 48px; }
 h3 { margin: 8px 0 4px; color: #fff; }
 
 .info-list {
-  background: #fff; border-radius: 12px; overflow: hidden; margin-bottom: 16px;
+  background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 16px;
 }
 .info-item {
   display: flex; justify-content: space-between; padding: 14px 16px;
-  border-bottom: 1px solid #f5f5f5; font-size: 14px;
+  border-bottom: 1px solid var(--border-light); font-size: 14px;
 }
 .info-item:last-child { border-bottom: none; }
-.label { color: #999; }
+.label { color: var(--text-muted); }
 
 .edit-form {
-  background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px;
+  background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 16px;
 }
 .form-group { margin-bottom: 14px; }
 .form-group label {
-  display: block; font-size: 13px; color: #666; margin-bottom: 6px;
+  display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;
 }
 .form-actions { display: flex; gap: 10px; justify-content: flex-end; }
 </style>

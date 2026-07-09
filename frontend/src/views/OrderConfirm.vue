@@ -81,26 +81,28 @@ async function goPay() {
   to { opacity: 1; transform: translateY(0); }
 }
 .result-icon { font-size: 64px; margin: 20px 0; }
-h1 { font-size: 22px; color: #333; margin: 0 0 24px; }
+h1 { font-size: var(--text-xl); color: var(--text-primary); margin: 0 0 24px; }
 
 .info-card {
-  background: #fff; border-radius: 12px; padding: 20px; text-align: left; margin-bottom: 24px;
+  background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; text-align: left; margin-bottom: 24px;
 }
 .info-row {
   display: flex; justify-content: space-between; padding: 8px 0;
-  font-size: 14px; color: #666;
+  font-size: 14px; color: var(--text-secondary);
 }
-.info-row span:first-child { color: #999; }
-.status-tag { color: #ff4757 !important; font-weight: 600; }
-.price { color: #ff4757; font-size: 18px; font-weight: 700; }
+.info-row span:first-child { color: var(--text-muted); }
+.status-tag { color: var(--primary) !important; font-weight: 600; }
+.price { color: var(--primary); font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 .actions { display: flex; flex-direction: column; gap: 12px; }
 .btn {
-  padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;
+  padding: 14px; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 600; cursor: pointer;
+  transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
-.btn--pay { background: linear-gradient(135deg, #ff4757, #ff6b81); color: #fff; }
-.btn--cancel { background: #f5f5f5; color: #666; }
-.btn--orders { background: none; color: #666; text-decoration: underline; }
+.btn--pay { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #fff; }
+.btn--pay:hover { transform: translateY(-1px); box-shadow: var(--shadow-brand); }
+.btn--cancel { background: var(--surface-2); color: var(--text-secondary); }
+.btn--orders { background: none; color: var(--text-secondary); text-decoration: underline; }
 
-.loading { text-align: center; padding: 80px; color: #999; }
+.loading { text-align: center; padding: 80px; color: var(--text-muted); }
 </style>

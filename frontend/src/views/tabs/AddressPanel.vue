@@ -221,19 +221,21 @@ async function handleDelete(addr) {
 
 .toolbar { margin-bottom: 12px; }
 
-.loading-text { text-align: center; padding: 20px; color: #999; font-size: 14px; }
+.loading-text { text-align: center; padding: 20px; color: var(--text-muted); font-size: 14px; }
 
 .address-card {
-  background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px;
+  background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px;
   position: relative;
+  transition: border-color var(--dur-1) var(--ease-out), box-shadow var(--dur-1) var(--ease-out);
 }
+.address-card:hover { border-color: var(--primary-light); box-shadow: var(--shadow-sm); }
 .addr-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-.phone { color: #999; font-size: 13px; }
-.addr-detail { font-size: 13px; color: #666; margin: 0 0 8px; }
+.phone { color: var(--text-muted); font-size: 13px; }
+.addr-detail { font-size: 13px; color: var(--text-secondary); margin: 0 0 8px; }
 
 .addr-actions {
-  display: flex; gap: 4px; border-top: 1px solid #f5f5f5; padding-top: 8px;
+  display: flex; gap: 4px; border-top: 1px solid var(--border-light); padding-top: 8px;
 }
 
-.empty { text-align: center; padding: 40px 20px; color: #999; font-size: 14px; }
+.empty { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 14px; }
 </style>

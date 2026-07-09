@@ -96,11 +96,11 @@ const authStore = useAuthStore()
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.page-title { font-size: 24px; font-weight: 700; color: #333; margin: 0 0 20px; }
+.page-title { font-size: var(--text-2xl); font-weight: 700; color: var(--text-primary); margin: 0 0 20px; }
 
 .profile-card {
-  background: linear-gradient(135deg, #ff4757, #ff6b81);
-  color: #fff; border-radius: 16px; padding: 32px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff; border-radius: var(--radius-lg); padding: 32px;
   text-align: center; margin-bottom: 20px;
 }
 .avatar { font-size: 56px; margin-bottom: 8px; }
@@ -109,28 +109,29 @@ h2 { font-size: 22px; color: #fff; margin: 0 0 4px; }
 
 .tabs {
   display: flex; gap: 4px; margin-bottom: 16px;
-  background: #f5f5f5; border-radius: 10px; padding: 4px;
+  background: var(--surface-2); border-radius: var(--radius-md); padding: 4px;
 }
 .tabs button {
-  flex: 1; padding: 10px; border: none; border-radius: 8px;
-  background: none; font-size: 14px; font-weight: 500; color: #666;
+  flex: 1; padding: 10px; border: none; border-radius: var(--radius-sm);
+  background: none; font-size: 14px; font-weight: 500; color: var(--text-secondary);
   cursor: pointer; transition: all 0.2s;
 }
-.tabs button.active { background: #fff; color: #ff4757; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.tabs button.active { background: var(--bg-white); color: var(--primary); box-shadow: var(--shadow-sm); }
 
 .tab-content { min-height: 150px; margin-bottom: 20px; }
 
 .menu-list {
-  background: #fff; border-radius: 12px; overflow: hidden;
+  background: var(--bg-white); border-radius: var(--radius-md); overflow: hidden;
+  border: 1px solid var(--border);
 }
 .menu-item {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 16px 20px; font-size: 15px; color: #333;
-  cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f5f5f5;
+  padding: 16px 20px; font-size: 15px; color: var(--text-primary);
+  cursor: pointer; transition: background var(--dur-1) var(--ease-out); border-bottom: 1px solid var(--border-light);
 }
 .menu-item:last-child { border-bottom: none; }
-.menu-item:hover { background: #f9f9f9; }
-.menu-item--danger { color: #ff4757; }
-.menu-item--admin { color: #3742fa; font-weight: 500; }
-.arrow { font-size: 20px; color: #ccc; }
+.menu-item:hover { background: var(--surface-2); }
+.menu-item--danger { color: var(--primary); }
+.menu-item--admin { color: var(--warning); font-weight: 500; }
+.arrow { font-size: 20px; color: var(--text-placeholder); }
 </style>

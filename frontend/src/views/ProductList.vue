@@ -111,22 +111,23 @@ function onPageChange(p) {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.page-title { font-size: 24px; font-weight: 700; color: #333; margin: 0 0 20px; }
+.page-title { font-size: var(--text-2xl); font-weight: 700; color: var(--text-primary); margin: 0 0 24px; }
 
-.filter-bar { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 20px; border: 1px solid #f0f0f0; }
-.filter-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.filter-bar { background: var(--bg-white); border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 24px; border: 1px solid var(--border); }
+.filter-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
 .filter-row:last-child { margin-bottom: 0; }
-.filter-label { font-size: 14px; color: #666; font-weight: 500; min-width: 50px; }
+.filter-label { font-size: 14px; color: var(--text-secondary); font-weight: 500; min-width: 50px; }
 .filter-row button {
-  padding: 6px 14px; border: 1px solid #e0e0e0; border-radius: 16px;
-  background: #fff; font-size: 13px; color: #666; cursor: pointer; transition: all 0.2s;
+  padding: 7px 16px; border: 1px solid var(--border); border-radius: var(--radius-xl);
+  background: var(--bg-white); font-size: 13px; color: var(--text-secondary); cursor: pointer;
+  transition: border-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out), background-color var(--dur-1) var(--ease-out);
 }
-.filter-row button:hover { border-color: #ff4757; color: #ff4757; }
-.filter-row button.active { background: #ff4757; color: #fff; border-color: #ff4757; }
+.filter-row button:hover { border-color: var(--primary); color: var(--primary); }
+.filter-row button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.loading, .empty { text-align: center; padding: 60px 20px; color: #999; font-size: 15px; }
+.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.loading, .empty { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 15px; }
 
 @media (max-width: 1024px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
 </style>

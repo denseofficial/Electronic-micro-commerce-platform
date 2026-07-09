@@ -61,24 +61,27 @@ function goDetail() {
 
 <style scoped>
 .product-card {
-  background: #fff;
-  border-radius: 12px;
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s;
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--border);
+  transition: transform var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out);
 }
 
 .product-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-light);
 }
 
 .product-card__image {
   position: relative;
   width: 100%;
   padding-top: 100%;
-  background: #f9f9f9;
+  background: var(--surface-2);
   overflow: hidden;
 }
 
@@ -88,52 +91,59 @@ function goDetail() {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s;
+  transition: transform var(--dur-3) var(--ease-out);
 }
 
 .product-card:hover .product-card__image img {
-  transform: scale(1.05);
+  transform: scale(1.06);
 }
 
 .tag {
   position: absolute;
-  top: 8px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+  top: 10px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 11px;
   font-weight: 600;
+  letter-spacing: 0.02em;
   color: #fff;
+  backdrop-filter: blur(2px);
 }
 
 .tag--new {
-  left: 8px;
-  background: #ff4757;
+  left: 10px;
+  background: var(--primary);
 }
 
 .tag--hot {
-  right: 8px;
-  background: #ff6348;
+  right: 10px;
+  background: var(--warning);
 }
 
 .product-card__info {
-  padding: 12px;
+  padding: 14px;
 }
 
 .product-card__name {
-  font-size: 15px;
+  font-size: var(--text-lg);
   font-weight: 600;
-  color: #333;
-  margin: 0 0 4px;
+  color: var(--text-primary);
+  margin: 0 0 6px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  transition: color var(--dur-1) var(--ease-out);
+}
+
+.product-card:hover .product-card__name {
+  color: var(--primary);
 }
 
 .product-card__desc {
-  font-size: 12px;
-  color: #999;
-  margin: 0 0 10px;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: 0 0 12px;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
@@ -148,25 +158,26 @@ function goDetail() {
 }
 
 .product-card__price {
-  font-size: 18px;
+  font-size: var(--text-xl);
   font-weight: 700;
-  color: #ff4757;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
 }
 
 .product-card__original {
-  font-size: 12px;
-  color: #ccc;
+  font-size: var(--text-sm);
+  color: var(--text-placeholder);
   text-decoration: line-through;
 }
 
 .product-card__sales {
-  font-size: 12px;
-  color: #999;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
   margin-left: auto;
 }
 
 /* 底部插槽区域 */
 .product-card__footer {
-  padding: 0 12px 12px;
+  padding: 0 14px 14px;
 }
 </style>

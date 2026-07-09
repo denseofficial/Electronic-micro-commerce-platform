@@ -43,8 +43,9 @@ function handleLogout() {
 }
 
 // 切换主题色（演示 inject 获取的更新方法）
+// 限定为暖色系，避免破坏 Refined Commerce「红色唯一强调色」的整体调性
 function toggleTheme() {
-  const colors = ['#ff4757', '#3742fa', '#2ed573', '#ff6348', '#a55eea']
+  const colors = ['#ff4757', '#ff6348', '#ff7f50', '#ffa502', '#e84393']
   const current = colors.indexOf(siteConfig.value.themeColor)
   const next = (current + 1) % colors.length
   updateSiteConfig({ themeColor: colors[next] })
@@ -98,12 +99,12 @@ cartStore.fetchCart()
 
 <style scoped>
 .header {
-  background: #fff;
-  border-bottom: 1px solid #e5e5e5;
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-sm);
 }
 
 .header__inner {
@@ -148,11 +149,11 @@ cartStore.fetchCart()
 
 .nav-link {
   text-decoration: none;
-  color: #333;
+  color: var(--text-primary);
   font-size: 14px;
   padding: 6px 12px;
-  border-radius: 6px;
-  transition: all 0.2s;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
   white-space: nowrap;
   background: none;
   border: none;
@@ -161,7 +162,7 @@ cartStore.fetchCart()
 }
 
 .nav-link:hover {
-  background: #f5f5f5;
+  background: var(--surface-2);
 }
 
 .nav-link--cart {
@@ -193,10 +194,10 @@ cartStore.fetchCart()
   position: absolute;
   right: 0;
   top: 100%;
-  background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
   min-width: 140px;
   overflow: hidden;
   z-index: 200;
@@ -213,13 +214,13 @@ cartStore.fetchCart()
   border: none;
   background: none;
   font-size: 14px;
-  color: #333;
+  color: var(--text-primary);
   cursor: pointer;
   text-align: left;
   font-family: inherit;
 }
 
 .dropdown-menu button:hover {
-  background: #f5f5f5;
+  background: var(--surface-2);
 }
 </style>
