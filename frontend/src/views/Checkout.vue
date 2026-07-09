@@ -49,14 +49,15 @@ async function submitOrder() {
     await cartStore.clearChecked()
     router.push({ name: 'OrderConfirm', params: { id: res.data.id } })
   } catch (e) {
-    // 详细的错误提示帮助定位问题
+    // 优先展示后端返回的真实原因（如「商品不存在：f-macbook」「商品价格已变动」）
+    const backendMsg = e.response?.data?.message
     if (e.message?.includes('Network Error') || e.code === 'ERR_NETWORK') {
       ElMessage.error('网络连接失败！请确认后端服务已启动（cd backend && npm run dev）')
     } else if (e.response?.status === 401 || e.message?.includes('请先登录')) {
       ElMessage.error('登录已过期，请重新登录')
       router.push({ name: 'Login', query: { redirect: '/checkout' } })
     } else {
-      ElMessage.error('下单失败：' + (e.message || '未知错误'))
+      ElMessage.error('下单失败：' + (backendMsg || e.message || '未知错误'))
     }
     console.error('[下单错误]', e)
   } finally {

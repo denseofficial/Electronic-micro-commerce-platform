@@ -4,12 +4,24 @@
 
 const CART_KEY = 'ec_mall_cart'
 
+// 合法商品主键必须是正整数（迁移前秒杀 mock 曾把 "f-macbook" 当主键写入购物车）
+function isValidProductId(id) {
+  const n = Number(id)
+  return Number.isInteger(n) && n > 0
+}
+
 function getLocalCart() {
+  let cart
   try {
-    return JSON.parse(localStorage.getItem(CART_KEY)) || []
+    cart = JSON.parse(localStorage.getItem(CART_KEY)) || []
   } catch {
-    return []
+    cart = []
   }
+  if (!Array.isArray(cart)) cart = []
+  const cleaned = cart.filter((item) => item && isValidProductId(item.productId))
+  // 把清理结果写回，自动修复迁移遗留的非法购物车数据
+  if (cleaned.length !== cart.length) saveLocalCart(cleaned)
+  return cleaned
 }
 
 function saveLocalCart(cart) {
